@@ -1,0 +1,81 @@
+---
+title: "Replication Paper"
+author: "Miroslav Bergam"
+date: "4/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+
+#### Load libraries
+library(plyr)
+library(stringr)
+library(ggplot2)
+library(boot)
+library(grid)
+library(RColorBrewer)
+library(reshape2)
+library(grid)
+library(gridExtra)
+library(data.table)
+library(blockTools)
+library(dplyr)
+library(Hmisc)
+
+```
+
+```{r Import Data}
+
+load("Cue-taking/zelizer_replication_data_IPC.RData")
+
+df$t <- relevel(as.factor(df$t) , ref = 2) ### Relevel factors so control is base category; Direct treatment: -1 is advocate; 0 is control; 1 is staffer
+df$t.spill <- relevel(as.factor(df$t.spill) , ref = 2) ### Indirect treatment:  -1 is advocate; 0 is control; 1 is staffer; 2 is double staffer
+for(i in 1:ncol(t.for.ri)){
+  t.for.ri[,i] <- relevel(as.factor(t.for.ri[,i]) , ref = 2)
+  t.spill.for.ri[,i] <- relevel(as.factor(t.spill.for.ri[,i]) , ref = 2)
+  cat("\r", i, "of", ncol(t.for.ri)) ### How far loop has progressed
+}
+df$treatment <- interaction(df$t,df$t.spill)
+levels(t.for.ri[,1])
+levels(t.spill.for.ri[,1])
+levels(df$treatment)
+
+```
+
+
+
+So far, I've been able to replicate all 7 figures used in my main paper. I am still working on making the spacing and size of the graphs perfect so that they are readable (I ran into this issue with Figures 2,4, and 5). I am able to produce the content of the 5 tables of the graph but I am running into bugs when I try to visualize them in stargazer. This is something I will fix for the next milestone.  
+
+^[[All analysis for this paper is availible at https://github.com/mirobergam/milestone-6](https://github.com/mirobergam/milestone-6)]
+
+
+## Figures 
+### Table 3
+
+```{r}
+
+### Table 3:
+table3 <- subset(df , office.size > 1) %>%
+  ddply(. , .(treatment) , function(x) out = data.frame(
+    Weighted.Mean = round(weighted.mean(x$cosp , x$ipw),3) ,
+    N = length(x$cosp))) %>%
+  mutate(treatment = as.integer(treatment)) %>%
+  filter(treatment == 1 | treatment == 3 | treatment == 7 | treatment == 9)
+
+treatments3 <- tibble(treatment = c(1,3,7,9),
+                      `Cue-Taking` = c("NO", "NO", "YES", "YES"),
+                      Briefing = c("NO", "YES", "NO", "YES"))
+
+table3 <- treatments3 %>% left_join(table3, by = "treatment") %>%
+  select(-treatment)
+
+table3
+
+```
+
+
+### Bibliography
+
+@main_paper @side_paper_1 @side_paper_2 @side_paper_3 @side_paper_4
