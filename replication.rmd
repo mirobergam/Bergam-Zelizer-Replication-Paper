@@ -193,7 +193,7 @@ ri.t3 <- array(NA, dim = c(3 , 2, ncol(t.spill.for.ri)),
                  c("no_vote","vote"),
                  c(1:10000)))
 
-for(i in 1:10){ #ncol(t.spill.for.ri)
+for(i in 1:ncol(t.spill.for.ri)){ #
   tempdf <- df[,c("bill","cosp","office.size","leg","passed")]
   tempdf$t <- t.for.ri[,i]
   tempdf$t.spill <- t.spill.for.ri[,i]
@@ -242,6 +242,185 @@ table5 <- rbind(cat5, cat10, cat15, cat6, cat12, cat18) %>%
 ### Table 6
 
 ```{r}
+
+### This function creates simulation-based inverse probability weights.
+ipw.function <- function(DATASET , T , T.SPILL , RI.T , RI.T.SPILL , VARNAME){
+	temp <- apply(matrix(1:ncol(RI.T.SPILL) , nrow=1) , 2 , function(z) {
+		temp1 <- as.numeric(RI.T.SPILL[,z]==DATASET[,T.SPILL])
+		temp2 <- as.numeric(RI.T[,z]==DATASET[,T])
+		return(as.numeric(temp1+temp2==2))
+	})
+
+	DATASET$V1 <- 1/apply(temp , 1 , mean)
+	setnames(DATASET,"V1",VARNAME)
+	return(DATASET)
+}
+
+load("Cue-taking/replication_data_alternative_spillover_simulations.RData")
+### Add IPWs for observed assignments
+df <- ipw.function(df , "t" , "t.spill.desk" , t.for.ri , ri.t.spill.desk , "ipw.desk")
+df <- ipw.function(df , "t" , "t.spill.dist" , t.for.ri , ri.t.spill.dist , "ipw.dist")
+df <- ipw.function(df , "t" , "t.spill.ideo" , t.for.ri , ri.t.spill.ideo , "ipw.ideo")
+
+table(df$t.spill,useNA="always")
+table(df$t.spill.desk,useNA="always")
+table(df$t.spill.dist,useNA="always")
+table(df$t.spill.ideo,useNA="always")
+
+df$treatment.desk <- relevel(interaction(df$t,df$t.spill.desk) , ref = 4)
+df$treatment.dist <- relevel(interaction(df$t,df$t.spill.dist) , ref = 4)
+df$treatment.ideo <- relevel(interaction(df$t,df$t.spill.ideo) , ref = 4)
+
+estimates <- data.frame(itt = matrix(NA,nrow=3,ncol=4))
+row.names(estimates) <- c("t","t.spill","t+t.spill")
+colnames(estimates) <- c("office","desk","distance","ideology")
+
+### Office Spillover
+estimates[1:3,1] <- unlist( summary(lm(cosp ~ treatment + bill + leg,
+                      data = subset(df , office.size > 1 &
+                                      !is.na(t.spill.desk) &
+                                      !is.na(t.spill.dist) &
+                                      !is.na(t.spill.ideo)),
+                      weights=ipw))$coef[c('treatment1.0',
+                                           'treatment0.1',
+                                           'treatment1.1'),
+                                           'Estimate'] )
+
+### Desk Spillover
+estimates[1:3,2] <- unlist( summary(lm(cosp ~ treatment.desk + bill + leg,
+                      data = subset(df , office.size > 1 &
+                                     !is.na(t.spill.desk) &
+                                     !is.na(t.spill.dist) &
+                                     !is.na(t.spill.ideo)),
+                      weights=ipw.desk))$coef[c('treatment.desk1.0',
+                                                'treatment.desk0.1',
+                                                'treatment.desk1.1'),
+                                                'Estimate'] )
+
+ ### Distance Spillover
+estimates[1:3,3] <- unlist( summary(lm(cosp ~ treatment.dist + bill + leg,
+                      data = subset(df , office.size > 1 &
+                                     !is.na(t.spill.desk) &
+                                     !is.na(t.spill.dist) &
+                                     !is.na(t.spill.ideo)),
+                      weights=ipw.dist))$coef[c('treatment.dist1.0',
+                                                'treatment.dist0.1',
+                                                'treatment.dist1.1'),
+                                                'Estimate'] )
+
+### Ideology Spillover
+estimates[1:3,4] <- unlist( summary(lm(cosp ~ treatment.ideo + bill + leg,
+                      data = subset(df , office.size > 1 &
+                                     !is.na(t.spill.desk) &
+                                     !is.na(t.spill.dist) &
+                                     !is.na(t.spill.ideo)),
+                      weights=ipw.ideo))$coef[c('treatment.ideo1.0',
+                                                'treatment.ideo0.1',
+                                                'treatment.ideo1.1'),
+                                                'Estimate'] )
+
+estimates
+
+#######################               RI           ##########################
+
+ri.t2 <- array(NA, dim = c(3 , 4, 50), #originally ncol(ri.t.spill.desk)
+               dimnames = list(
+                 c("t","t.spill","t+t.spill"),
+                 c("office","desk","distance","ideology"),
+                 c(1:50)))
+
+for(i in 1:50){ #ncol(ri.t.spill.desk
+  tempdf <- df[,c("bill","cosp","office.size","leg")]
+  tempdf$t <- t.for.ri[,i]
+  tempdf$t.spill <- t.spill.for.ri[,i]
+  tempdf$ipw <- ipw.for.ri[,i]
+
+  tempdf$t.spill.desk <- ri.t.spill.desk[,i]
+  tempdf$t.spill.dist <- ri.t.spill.dist[,i]
+  tempdf$t.spill.ideo <- ri.t.spill.ideo[,i]
+
+
+  tempdf <- ipw.function(tempdf , "t" , "t.spill.desk" , t.for.ri , ri.t.spill.desk , "ipw.desk")
+  tempdf <- ipw.function(tempdf , "t" , "t.spill.dist" , t.for.ri , ri.t.spill.dist , "ipw.dist")
+  tempdf <- ipw.function(tempdf , "t" , "t.spill.ideo" , t.for.ri , ri.t.spill.ideo , "ipw.ideo")
+  tempdf$treatment <- interaction(tempdf$t,tempdf$t.spill)
+  tempdf$treatment.desk <- interaction(tempdf$t,tempdf$t.spill.desk)
+  tempdf$treatment.dist <- interaction(tempdf$t,tempdf$t.spill.dist)
+  tempdf$treatment.ideo <- interaction(tempdf$t,tempdf$t.spill.ideo)
+  print(levels(tempdf$treatment.ideo)[1])
+  print(levels(tempdf$treatment.desk)[1])
+  print(levels(tempdf$treatment.dist)[1])
+
+  ### Office Spillover
+  ri.t2[1:3,1,i] <- unlist( summary(lm(cosp ~ treatment + bill + leg,
+                      data = subset(tempdf , office.size > 1 &
+                                     !is.na(t.spill.desk) &
+                                     !is.na(t.spill.dist) &
+                                     !is.na(t.spill.ideo)),
+                      weights=ipw))$coef[c('treatment1.0',
+                                           'treatment0.1',
+                                           'treatment1.1'),
+                                           'Estimate'] )
+
+  ### Desk Spillover
+  ri.t2[1:3,2,i] <- unlist( summary(lm(cosp ~ treatment.desk + bill + leg,
+                      data = subset(tempdf , office.size > 1 &
+                                     !is.na(t.spill.desk) &
+                                     !is.na(t.spill.dist) &
+                                     !is.na(t.spill.ideo)),
+                      weights=ipw.desk))$coef[c('treatment.desk1.0',
+                                                'treatment.desk0.1',
+                                                'treatment.desk1.1'),'Estimate'] )
+
+  ### Distance Spillover
+  ri.t2[1:3,3,i] <- unlist( summary(lm(cosp ~ treatment.dist + bill + leg,
+                      data = subset(tempdf , office.size > 1 &
+                                     !is.na(t.spill.desk) &
+                                     !is.na(t.spill.dist) &
+                                     !is.na(t.spill.ideo)),
+                      weights=ipw.dist))$coef[c('treatment.dist1.0',
+                                                'treatment.dist0.1',
+                                                'treatment.dist1.1'),
+                                                'Estimate'] )
+
+  ### Ideology Spillover
+  ri.t2[1:3,4,i] <- unlist( summary(lm(cosp ~ treatment.ideo + bill + leg,
+                      data = subset(tempdf , office.size > 1 &
+                                     !is.na(t.spill.desk) &
+                                     !is.na(t.spill.dist) &
+                                     !is.na(t.spill.ideo)),
+                      weights=ipw.ideo))$coef[c('treatment.ideo1.0',
+                                                'treatment.ideo0.1',
+                                                'treatment.ideo1.1'),
+                                                'Estimate'] )
+
+  cat("\r", i, "of", ncol(ri.t.spill.desk)) ### How far loop has progressed
+}
+
+estimates
+### Table 6:
+for(j in 1:4){
+  print(colnames(estimates)[j])
+  for(i in 1:3){
+  print(row.names(estimates)[i])
+  assign(paste0("owl", i * (j+6)), 
+  data.frame(
+  	 st = estimates[i,j] ,
+  	SD = sd(ri.t2[i,j,])
+  ))
+  }}
+
+table6 <- rbind(owl7, owl8, owl9, owl10, owl14, owl16,
+                owl18, owl20, owl21, owl24, owl27, owl30) %>%
+  mutate(Condition = c("Briefing","Briefing","Briefing","Briefing",
+                       "Cue-Taking","Cue-Taking","Cue-Taking","Cue-Taking",
+                       "Combined", "Combined", "Combined", "Combined"),
+         Model = c("Offices", "Desks", "Districts", "Ideology",
+                   "Offices", "Desks", "Districts", "Ideology",
+                   "Offices", "Desks", "Districts", "Ideology"),
+         ITT = st * 100,
+         SE = SD * 100) %>%
+  select(Model, Condition, ITT, SE)
 
 ```
 
