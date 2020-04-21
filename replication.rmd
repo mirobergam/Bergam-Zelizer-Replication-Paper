@@ -28,6 +28,7 @@ library(blockTools)
 library(dplyr)
 library(Hmisc)
 library(gt)
+library(rstanarm)
 
 ```
 
@@ -109,13 +110,25 @@ gt(table3)
 
 ```
 
-### Table 4
+### Table 4 Ext.
 
 ```{r Table 4, cache = TRUE}
+
+### x <- stan_lm(cosp ~ treatment + bill + leg, data = subset(df , office.size > 1), weights=ipw, refresh = FALSE, prior = NULL)
+
+### summary(x, digits = 10)
+
+## pp_check(model, "dens_overlay") # takes the original data and show in a really dark apttern, and show the bayesian runs of it in the background to see how well the data ftis
+# weird fit
+# because these are discrete values the model ended up matching up weird but its decent. bayesian model assu,es conntinues. <ike for example the tail extends past 0. try to make it discrete instead of continiuous
+
+# x <- x$coefficients[c('treatment1.0','treatment0.1','treatment1.1')] and do same w ses and bind
 
 # Preferred specification
 estimates <- data.frame(itt = matrix(NA,nrow=3,ncol=1))
 row.names(estimates) <- c("t","t.spill","t+t.spill")
+
+## Create new dataset
 
 estimates[1:3,] <- summary(lm(cosp ~ treatment + bill + leg ,
                               data = subset(df , office.size > 1),
@@ -166,7 +179,7 @@ for(i in 1:ncol(ri.t)){
                             weights=ipw))$coef[
                             c('treatment1.0','treatment0.1','treatment1.1'),
                             'Estimate']
-  #cat("\r", i, "of", ncol(ri.t)) ### How far loop has progressed
+  cat("\r", i, "of", ncol(ri.t)) ### How far loop has progressed
 }
 
 ########################## 
@@ -184,6 +197,94 @@ table4 <- apply(cbind.data.frame(ri.t[1:3,], estimates) , 1 , function(x)
 table4 <- as_tibble(table4)
 
 table4 <- table4 %>%
+  mutate(t = t * 100,
+         t.spill = t.spill * 100, 
+         `t+t.spill` = `t+t.spill` * 100) %>%
+  mutate(Value = c("ITT", "SE"),
+         Briefing = t,
+        `Cue-Taking` = t.spill, 
+        Combined = `t+t.spill`) %>%
+  select(Value, Briefing, `Cue-Taking`,Combined)
+
+gt(table4)
+
+```
+
+```{r Table 4, cache = TRUE}
+
+# Preferred specification
+estimates <- data.frame(itt = matrix(NA,nrow=3,ncol=1))
+row.names(estimates) <- c("t","t.spill","t+t.spill")
+
+estimates[1:3,] <- summary(lm(cosp ~ treatment + bill + leg ,
+                              data = subset(df , office.size > 1),
+                              weights=ipw))$coef[
+                              c('treatment1.0','treatment0.1','treatment1.1'),
+                              'Estimate']
+
+estimates[2,1]/estimates[1,1] ### Contagion rate
+nrow(subset(df , office.size > 1))
+
+################################
+
+ri.t <- data.frame(matrix(NA, nrow = 3 , ncol = 100)) ##this used to be 10,000
+row.names(ri.t) <- row.names(estimates)
+ci.t <- ri.t
+tempdf <- df
+
+tempdf$Y0 <- df$cosp
+tempdf$Y0[tempdf$treatment=="1.0"] <- tempdf$cosp[tempdf$treatment=="1.0"] -
+                                            estimates[1,1]
+tempdf$Y0[tempdf$treatment=="0.1"] <- tempdf$cosp[tempdf$treatment=="0.1"] -
+                                            estimates[2,1]
+tempdf$Y0[tempdf$treatment=="1.1"] <- tempdf$cosp[tempdf$treatment=="1.1"] -
+                                            estimates[3,1]
+
+#group_by/factor_by (treatment)
+
+for(i in 1:ncol(ri.t)){
+  tempdf$t <- t.for.ri[,i]
+  tempdf$t.spill <- t.spill.for.ri[,i]
+  tempdf$ipw <- ipw.for.ri[,i]
+  tempdf$treatment <- interaction(tempdf$t,tempdf$t.spill)
+
+  ri.t[1:3,i] <- summary(lm(cosp ~ treatment + bill + leg ,
+                            data = subset(tempdf , office.size > 1),
+                            weights=ipw))$coef[
+                            c('treatment1.0','treatment0.1','treatment1.1'),
+                            'Estimate']
+
+  tempdf$cosp1 <- tempdf$Y0
+  tempdf$cosp1[tempdf$treatment=="1.0"] <- tempdf$Y0[tempdf$treatment=="1.0"] +
+                                                estimates[1,1]
+  tempdf$cosp1[tempdf$treatment=="0.1"] <- tempdf$Y0[tempdf$treatment=="0.1"] +
+                                                estimates[2,1]
+  tempdf$cosp1[tempdf$treatment=="1.1"] <- tempdf$Y0[tempdf$treatment=="1.1"] +
+                                                estimates[3,1]
+
+  ci.t[1:3,i] <- summary(lm(cosp1 ~ treatment + bill + leg ,
+                            data = subset(tempdf , office.size > 1),
+                            weights=ipw))$coef[
+                            c('treatment1.0','treatment0.1','treatment1.1'),
+                            'Estimate']
+  cat("\r", i, "of", ncol(ri.t)) ### How far loop has progressed
+}
+
+########################## 
+
+
+#### Table 4:
+table4 <- apply(cbind.data.frame(ri.t[1:3,], estimates) , 1 , function(x)
+  out = unlist(data.frame(
+    Est = round(x[ncol(ri.t)+1],3),
+#    mean.sim.ITT = round(mean(x[1:ncol(ri.t)]),4),
+    SE = round(sd(x[1:ncol(ri.t)]),3)
+#    p.one.sided = round(mean(x[1:ncol(ri.t)] > x[ncol(ri.t)+1]),4)
+  )))
+
+table4 <- as_tibble(table4)
+
+table41 <- table4 %>%
   mutate(t = t * 100,
          t.spill = t.spill * 100, 
          `t+t.spill` = `t+t.spill` * 100) %>%
@@ -249,7 +350,7 @@ for(i in 1:ncol(t.spill.for.ri)){ #
                                                            'treatment1.1'),
                                                            'Estimate'])
 
-  #cat("\r", i, "of", ncol(t.spill.for.ri)) ### How far loop has progressed
+  cat("\r", i, "of", ncol(t.spill.for.ri)) ### How far loop has progressed
 }
 
 ### Table 5:
