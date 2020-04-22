@@ -50,14 +50,17 @@ levels(df$treatment)
 
 ```
 
-## Introduction
+## Abstract
 
-This is an extension of the research conducted by Adam  Zelizer at The
-University of Chicago in 2019, which finds that the cues that state legislators
-take from their peers influences their policymaking decisions. The paper also
-concludes that that this influence is at play late in the policymaking process,
-as well as that these cues complement rather than substitute other sources of
-information.
+Zelizer (2019) finds that the cues that legislators take from their peers, in
+addition to other credible sources of information like briefings, influence
+their policymaking decisions. I succesfully replicated Zelizer’s results.
+Zelizer took a Bayesian approach to his findings, running 10,000 simulations for
+each table and figure using for-loops to produce estimates and standard
+deviations; however, this made his code inefficient and extremely slow Using the
+rstanarm package, I was able to simplify his code while maintaining the Bayesian
+integrity of the study. This extension served as both a robustness test of his
+results and a simplification that makes the study more easily reproducable.
 
 ## Literature Review
 
@@ -110,7 +113,7 @@ gt(table3)
 
 ```
 
-### Table 4 Ext.
+### Table 4
 
 ```{r Table 4, cache = TRUE}
 
@@ -179,7 +182,7 @@ for(i in 1:ncol(ri.t)){
                             weights=ipw))$coef[
                             c('treatment1.0','treatment0.1','treatment1.1'),
                             'Estimate']
-  cat("\r", i, "of", ncol(ri.t)) ### How far loop has progressed
+  #cat("\r", i, "of", ncol(ri.t)) ### How far loop has progressed
 }
 
 ########################## 
@@ -197,94 +200,6 @@ table4 <- apply(cbind.data.frame(ri.t[1:3,], estimates) , 1 , function(x)
 table4 <- as_tibble(table4)
 
 table4 <- table4 %>%
-  mutate(t = t * 100,
-         t.spill = t.spill * 100, 
-         `t+t.spill` = `t+t.spill` * 100) %>%
-  mutate(Value = c("ITT", "SE"),
-         Briefing = t,
-        `Cue-Taking` = t.spill, 
-        Combined = `t+t.spill`) %>%
-  select(Value, Briefing, `Cue-Taking`,Combined)
-
-gt(table4)
-
-```
-
-```{r Table 4, cache = TRUE}
-
-# Preferred specification
-estimates <- data.frame(itt = matrix(NA,nrow=3,ncol=1))
-row.names(estimates) <- c("t","t.spill","t+t.spill")
-
-estimates[1:3,] <- summary(lm(cosp ~ treatment + bill + leg ,
-                              data = subset(df , office.size > 1),
-                              weights=ipw))$coef[
-                              c('treatment1.0','treatment0.1','treatment1.1'),
-                              'Estimate']
-
-estimates[2,1]/estimates[1,1] ### Contagion rate
-nrow(subset(df , office.size > 1))
-
-################################
-
-ri.t <- data.frame(matrix(NA, nrow = 3 , ncol = 100)) ##this used to be 10,000
-row.names(ri.t) <- row.names(estimates)
-ci.t <- ri.t
-tempdf <- df
-
-tempdf$Y0 <- df$cosp
-tempdf$Y0[tempdf$treatment=="1.0"] <- tempdf$cosp[tempdf$treatment=="1.0"] -
-                                            estimates[1,1]
-tempdf$Y0[tempdf$treatment=="0.1"] <- tempdf$cosp[tempdf$treatment=="0.1"] -
-                                            estimates[2,1]
-tempdf$Y0[tempdf$treatment=="1.1"] <- tempdf$cosp[tempdf$treatment=="1.1"] -
-                                            estimates[3,1]
-
-#group_by/factor_by (treatment)
-
-for(i in 1:ncol(ri.t)){
-  tempdf$t <- t.for.ri[,i]
-  tempdf$t.spill <- t.spill.for.ri[,i]
-  tempdf$ipw <- ipw.for.ri[,i]
-  tempdf$treatment <- interaction(tempdf$t,tempdf$t.spill)
-
-  ri.t[1:3,i] <- summary(lm(cosp ~ treatment + bill + leg ,
-                            data = subset(tempdf , office.size > 1),
-                            weights=ipw))$coef[
-                            c('treatment1.0','treatment0.1','treatment1.1'),
-                            'Estimate']
-
-  tempdf$cosp1 <- tempdf$Y0
-  tempdf$cosp1[tempdf$treatment=="1.0"] <- tempdf$Y0[tempdf$treatment=="1.0"] +
-                                                estimates[1,1]
-  tempdf$cosp1[tempdf$treatment=="0.1"] <- tempdf$Y0[tempdf$treatment=="0.1"] +
-                                                estimates[2,1]
-  tempdf$cosp1[tempdf$treatment=="1.1"] <- tempdf$Y0[tempdf$treatment=="1.1"] +
-                                                estimates[3,1]
-
-  ci.t[1:3,i] <- summary(lm(cosp1 ~ treatment + bill + leg ,
-                            data = subset(tempdf , office.size > 1),
-                            weights=ipw))$coef[
-                            c('treatment1.0','treatment0.1','treatment1.1'),
-                            'Estimate']
-  cat("\r", i, "of", ncol(ri.t)) ### How far loop has progressed
-}
-
-########################## 
-
-
-#### Table 4:
-table4 <- apply(cbind.data.frame(ri.t[1:3,], estimates) , 1 , function(x)
-  out = unlist(data.frame(
-    Est = round(x[ncol(ri.t)+1],3),
-#    mean.sim.ITT = round(mean(x[1:ncol(ri.t)]),4),
-    SE = round(sd(x[1:ncol(ri.t)]),3)
-#    p.one.sided = round(mean(x[1:ncol(ri.t)] > x[ncol(ri.t)+1]),4)
-  )))
-
-table4 <- as_tibble(table4)
-
-table41 <- table4 %>%
   mutate(t = t * 100,
          t.spill = t.spill * 100, 
          `t+t.spill` = `t+t.spill` * 100) %>%
@@ -350,7 +265,7 @@ for(i in 1:ncol(t.spill.for.ri)){ #
                                                            'treatment1.1'),
                                                            'Estimate'])
 
-  cat("\r", i, "of", ncol(t.spill.for.ri)) ### How far loop has progressed
+  #cat("\r", i, "of", ncol(t.spill.for.ri)) ### How far loop has progressed
 }
 
 ### Table 5:
@@ -386,113 +301,9 @@ gt(table5)
 
 ```
 
-
-### Figure 3
-
-```{r}
-
-load("Cue-taking/zelizer_replication_data_dates_IPC.RData")
-
-nsims <- 10 #This was at 1000 before
-
-df$treatment <- interaction(df$t,df$t.spill)
-levels(df$treatment)
-
-nDays <- seq(0,98,7)
-days.ri <- data.frame(matrix(NA,nrow=length(nDays) , ncol = 3))
-days.ri.SE <- data.frame(matrix(NA,nrow=length(nDays) , ncol = 3))
-
-for(i in nDays){
-  Ydays <- as.numeric(!is.na(df$days) & df$days <= i & df$days >=0 & df$cosp==1)
-  days.ri[match(i,nDays),1:3] <- summary(lm(Ydays ~ treatment + bill + leg ,
-                                            data = df,
-                                            weights=ipw))$coef[c('treatment1.0','treatment0.1','treatment1.1'),'Estimate']
-  temp <- data.frame(matrix(NA,nrow=nsims,ncol=3))
-  for(j in 1:nsims){
-    treatment.sim <- interaction(t.for.ri2[,j],t.spill.for.ri2[,j])
-    levels(treatment.sim)
-    temp[j,1:3] <- summary(lm(Ydays ~ treatment.sim + bill + leg ,
-                              data = df,
-                              weights=ipw.for.ri2[,j]))$coef[c('treatment.sim1.0','treatment.sim0.1','treatment.sim1.1'),'Estimate']
-  }
-  temp <- apply(temp , 2 , sd)
-  days.ri.SE[match(i,nDays),1:3] <- temp
-  cat("\r", i, "of", nDays) ### How far loop has progressed
-}
-
-tempnum <- 1
-data.frame(ATE = days.ri[,tempnum],
-           CIlow = days.ri[,tempnum] - 1.65*days.ri.SE[,tempnum],
-           CIhigh = days.ri[,tempnum] + 1.65*days.ri.SE[,tempnum],
-           X = nDays/7) %>%
-  ggplot(., aes(x = factor(X) )) +
-  geom_errorbar(aes(ymin = CIlow*100 , ymax = CIhigh*100 , width = 0)) +
-  geom_point(aes(y = ATE*100)) +
-  scale_y_continuous(minor_breaks=waiver(), labels = waiver(), breaks=c(-2,0,2,4,6,8) , limits = c(-2,9)) +
-  labs(x = "Week of Session", y = "Est. ATE (perc. pts.)") +
-  geom_smooth(aes(y = ATE*100) , col = "black" , method = "loess" , se = FALSE) +
-  geom_vline(xintercept=0 , color = "#535353" , lwd = 1) +
-  geom_hline(yintercept=0 , color = "#535353" , lwd = 1) +
-  theme(panel.background = element_blank(),
-        panel.grid = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title.x = element_text(color = "#535353" , size = 12, face="bold"),
-        axis.title.y = element_text(color = "#535353" , size = 12, face="bold"),
-        axis.text.y = element_text(size = 12, colour = "grey50"),
-        axis.text.x = element_text(size = 8, colour = "grey50"),
-        panel.border = element_blank(),
-        legend.key = element_rect(colour = "white",fill = "white"),
-        legend.text = element_text(size=10,color="grey50"),
-        legend.title = element_text(size = 11, face = "bold", colour = "#535353"),
-        strip.text.x = element_text(size = 11, face = "bold", colour = "#535353"),
-        strip.background = element_rect(colour = "white", fill = "white"),
-        legend.position="right",
-        plot.margin = unit(c(0.75,0.75,0.75,0.75), "cm"))
-
-
-```
-
-### Figure 4
-
-```{r}
-
-tempnum <- 2
-data.frame(ATE = days.ri[,tempnum],
-           CIlow = days.ri[,tempnum] - 1.65*days.ri.SE[,tempnum],
-           CIhigh = days.ri[,tempnum] + 1.65*days.ri.SE[,tempnum],
-           X = nDays/7) %>%
-  ggplot(., aes(x = factor(X) )) +
-  geom_errorbar(aes(ymin = CIlow*100 , ymax = CIhigh*100 , width = 0)) +
-  geom_point(aes(y = ATE*100)) +
-  scale_y_continuous(minor_breaks=waiver(), labels = waiver(), breaks=c(-2,0,2,4,6,8) , limits = c(-2,9)) +
-  labs(x = "Week of Session", y = "Est. ATE (perc. pts.)") +
-  geom_smooth(aes(y = ATE*100) , col = "black" , method = "loess" , se = FALSE) +
-  geom_vline(xintercept=0 , color = "#535353" , lwd = 1) +
-  geom_hline(yintercept=0 , color = "#535353" , lwd = 1) +
-  theme(panel.background = element_blank(),
-        panel.grid = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title.x = element_text(color = "#535353" , size = 12, face="bold"),
-        axis.title.y = element_text(color = "#535353" , size = 12, face="bold"),
-        axis.text.y = element_text(size = 12, colour = "grey50"),
-        axis.text.x = element_text(size = 8, colour = "grey50"),
-        panel.border = element_blank(),
-        legend.key = element_rect(colour = "white",fill = "white"),
-        legend.text = element_text(size=10,color="grey50"),
-        legend.title = element_text(size = 11, face = "bold", colour = "#535353"),
-        strip.text.x = element_text(size = 11, face = "bold", colour = "#535353"),
-        strip.background = element_rect(colour = "white", fill = "white"),
-        legend.position="right",
-        plot.margin = unit(c(0.75,0.75,0.75,0.75), "cm"))
-
-```
-
-
 ### Table 6
 
 ```{r Table 6, cache = TRUE}
-
-df1 <- df
 
 ### This function creates simulation-based inverse probability weights.
 ipw.function <- function(DATASET , T , T.SPILL , RI.T , RI.T.SPILL , VARNAME){
@@ -681,131 +492,106 @@ gt(table61)
 
 ```
 
-```{r Handling Missing Data, cache=TRUE}
 
-library(mice)
+### Figure 3
 
-imp1 <- mice(df1, maxit = 5)
+```{r}
 
-df_new <- complete(imp1, action="long", include = TRUE) %>% as_tibble()
+load("Cue-taking/zelizer_replication_data_dates_IPC.RData")
 
-```
+nsims <- 10 #This was at 1000 before
 
-```{r Table 6 Missing Data, cache = TRUE}
+df$treatment <- interaction(df$t,df$t.spill)
+levels(df$treatment)
 
-### This function creates simulation-based inverse probability weights.
-ipw.function <- function(DATASET , T , T.SPILL , RI.T , RI.T.SPILL , VARNAME){
-	temp <- apply(matrix(1:ncol(RI.T.SPILL) , nrow=1) , 2 , function(z) {
-		temp1 <- as.numeric(RI.T.SPILL[,z]==DATASET[,T.SPILL])
-		temp2 <- as.numeric(RI.T[,z]==DATASET[,T])
-		return(as.numeric(temp1+temp2==2))
-	})
+nDays <- seq(0,98,7)
+days.ri <- data.frame(matrix(NA,nrow=length(nDays) , ncol = 3))
+days.ri.SE <- data.frame(matrix(NA,nrow=length(nDays) , ncol = 3))
 
-	DATASET$V1 <- 1/apply(temp , 1 , mean)
-	setnames(DATASET,"V1",VARNAME)
-	return(DATASET)
+for(i in nDays){
+  Ydays <- as.numeric(!is.na(df$days) & df$days <= i & df$days >=0 & df$cosp==1)
+  days.ri[match(i,nDays),1:3] <- summary(lm(Ydays ~ treatment + bill + leg ,
+                                            data = df,
+                                            weights=ipw))$coef[c('treatment1.0','treatment0.1','treatment1.1'),'Estimate']
+  temp <- data.frame(matrix(NA,nrow=nsims,ncol=3))
+  for(j in 1:nsims){
+    treatment.sim <- interaction(t.for.ri2[,j],t.spill.for.ri2[,j])
+    levels(treatment.sim)
+    temp[j,1:3] <- summary(lm(Ydays ~ treatment.sim + bill + leg ,
+                              data = df,
+                              weights=ipw.for.ri2[,j]))$coef[c('treatment.sim1.0','treatment.sim0.1','treatment.sim1.1'),'Estimate']
+  }
+  temp <- apply(temp , 2 , sd)
+  days.ri.SE[match(i,nDays),1:3] <- temp
+  cat("\r", i, "of", nDays) ### How far loop has progressed
 }
 
-load("Cue-taking/replication_data_alternative_spillover_simulations.RData")
-### Add IPWs for observed assignments
-df_new <- ipw.function(df_new , "t" , "t.spill.desk" , t.for.ri , ri.t.spill.desk , "ipw.desk")
-df_new <- ipw.function(df_new , "t" , "t.spill.dist" , t.for.ri , ri.t.spill.dist , "ipw.dist")
-df_new <- ipw.function(df_new , "t" , "t.spill.ideo" , t.for.ri , ri.t.spill.ideo , "ipw.ideo")
-
-table(df_new$t.spill,useNA="always")
-table(df_new$t.spill.desk,useNA="always")
-table(df_new$t.spill.dist,useNA="always")
-table(df_new$t.spill.ideo,useNA="always")
-
-df_new$treatment.desk <- relevel(interaction(df$t,df$t.spill.desk) , ref = 4)
-df_new$treatment.dist <- relevel(interaction(df$t,df$t.spill.dist) , ref = 4)
-df_new$treatment.ideo <- relevel(interaction(df$t,df$t.spill.ideo) , ref = 4)
-
-estimates <- data.frame(itt = matrix(NA,nrow=3,ncol=4))
-row.names(estimates) <- c("t","t.spill","t+t.spill")
-colnames(estimates) <- c("office","desk","distance","ideology")
-
-### Office Spillover
-estimates[1:3,1] <- unlist( summary(lm(cosp ~ treatment + bill + leg,
-                      data = subset(df_new , office.size > 1 &
-                                      !is.na(t.spill.desk) &
-                                      !is.na(t.spill.dist) &
-                                      !is.na(t.spill.ideo)),
-                      weights=ipw))$coef[c('treatment1.0',
-                                           'treatment0.1',
-                                           'treatment1.1'),
-                                           'Estimate'] )
-
-### Desk Spillover
-estimates[1:3,2] <- unlist( summary(lm(cosp ~ treatment.desk + bill + leg,
-                      data = subset(df_new , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw.desk))$coef[c('treatment.desk1.0',
-                                                'treatment.desk0.1',
-                                                'treatment.desk1.1'),
-                                                'Estimate'] )
-
- ### Distance Spillover
-estimates[1:3,3] <- unlist( summary(lm(cosp ~ treatment.dist + bill + leg,
-                      data = subset(df_new , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw.dist))$coef[c('treatment.dist1.0',
-                                                'treatment.dist0.1',
-                                                'treatment.dist1.1'),
-                                                'Estimate'] )
-
-### Ideology Spillover
-estimates[1:3,4] <- unlist( summary(lm(cosp ~ treatment.ideo + bill + leg,
-                      data = subset(df_new , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw.ideo))$coef[c('treatment.ideo1.0',
-                                                'treatment.ideo0.1',
-                                                'treatment.ideo1.1'),
-                                                'Estimate'] )
-
-
-### Table 6:
-for(j in 1:4){
-  print(colnames(estimates)[j])
-  for(i in 1:3){
-  print(row.names(estimates)[i])
-  assign(paste0("owl", i * (j+6)), 
-  data.frame(
-  	 st = estimates[i,j] ,
-  	SD = sd(ri.t2[i,j,])
-  ))
-  }}
-
-table62 <- rbind(owl7, owl8, owl9, owl10, owl14, owl16,
-                owl18, owl20, owl21, owl24, owl27, owl30) %>%
-  mutate(Condition = c("Briefing","Briefing","Briefing","Briefing",
-                       "Cue-Taking","Cue-Taking","Cue-Taking","Cue-Taking",
-                       "Combined", "Combined", "Combined", "Combined"),
-         Model = c("Offices", "Desks", "Districts", "Ideology",
-                   "Offices", "Desks", "Districts", "Ideology",
-                   "Offices", "Desks", "Districts", "Ideology"),
-         ITT = round((st * 100),3),
-         SE = round((SD * 100),3)) %>%
-  select(Model, Condition, ITT, SE)
-
-table622 <- table62 %>%
-  mutate(ITT = as.character(ITT)) %>%
-  mutate(SE = as.character(SE)) %>%
-  mutate(`ITT(SE)` = paste(ITT," (", SE, ")")) %>%
-  select(Model, Condition, `ITT(SE)`)  %>%
-  pivot_wider(names_from = Model, values_from = `ITT(SE)`)
-
-gt(table622)
+tempnum <- 1
+data.frame(ATE = days.ri[,tempnum],
+           CIlow = days.ri[,tempnum] - 1.65*days.ri.SE[,tempnum],
+           CIhigh = days.ri[,tempnum] + 1.65*days.ri.SE[,tempnum],
+           X = nDays/7) %>%
+  ggplot(., aes(x = factor(X) )) +
+  geom_errorbar(aes(ymin = CIlow*100 , ymax = CIhigh*100 , width = 0)) +
+  geom_point(aes(y = ATE*100)) +
+  scale_y_continuous(minor_breaks=waiver(), labels = waiver(), breaks=c(-2,0,2,4,6,8) , limits = c(-2,9)) +
+  labs(x = "Week of Session", y = "Est. ATE (perc. pts.)") +
+  geom_smooth(aes(y = ATE*100) , col = "black" , method = "loess" , se = FALSE) +
+  geom_vline(xintercept=0 , color = "#535353" , lwd = 1) +
+  geom_hline(yintercept=0 , color = "#535353" , lwd = 1) +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_text(color = "#535353" , size = 12, face="bold"),
+        axis.title.y = element_text(color = "#535353" , size = 12, face="bold"),
+        axis.text.y = element_text(size = 12, colour = "grey50"),
+        axis.text.x = element_text(size = 8, colour = "grey50"),
+        panel.border = element_blank(),
+        legend.key = element_rect(colour = "white",fill = "white"),
+        legend.text = element_text(size=10,color="grey50"),
+        legend.title = element_text(size = 11, face = "bold", colour = "#535353"),
+        strip.text.x = element_text(size = 11, face = "bold", colour = "#535353"),
+        strip.background = element_rect(colour = "white", fill = "white"),
+        legend.position="right",
+        plot.margin = unit(c(0.75,0.75,0.75,0.75), "cm"))
 
 
 ```
 
+### Figure 4
+
+```{r}
+
+tempnum <- 2
+data.frame(ATE = days.ri[,tempnum],
+           CIlow = days.ri[,tempnum] - 1.65*days.ri.SE[,tempnum],
+           CIhigh = days.ri[,tempnum] + 1.65*days.ri.SE[,tempnum],
+           X = nDays/7) %>%
+  ggplot(., aes(x = factor(X) )) +
+  geom_errorbar(aes(ymin = CIlow*100 , ymax = CIhigh*100 , width = 0)) +
+  geom_point(aes(y = ATE*100)) +
+  scale_y_continuous(minor_breaks=waiver(), labels = waiver(), breaks=c(-2,0,2,4,6,8) , limits = c(-2,9)) +
+  labs(x = "Week of Session", y = "Est. ATE (perc. pts.)") +
+  geom_smooth(aes(y = ATE*100) , col = "black" , method = "loess" , se = FALSE) +
+  geom_vline(xintercept=0 , color = "#535353" , lwd = 1) +
+  geom_hline(yintercept=0 , color = "#535353" , lwd = 1) +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_text(color = "#535353" , size = 12, face="bold"),
+        axis.title.y = element_text(color = "#535353" , size = 12, face="bold"),
+        axis.text.y = element_text(size = 12, colour = "grey50"),
+        axis.text.x = element_text(size = 8, colour = "grey50"),
+        panel.border = element_blank(),
+        legend.key = element_rect(colour = "white",fill = "white"),
+        legend.text = element_text(size=10,color="grey50"),
+        legend.title = element_text(size = 11, face = "bold", colour = "#535353"),
+        strip.text.x = element_text(size = 11, face = "bold", colour = "#535353"),
+        strip.background = element_rect(colour = "white", fill = "white"),
+        legend.position="right",
+        plot.margin = unit(c(0.75,0.75,0.75,0.75), "cm"))
+
+```
 
 ### Bibliography
 
