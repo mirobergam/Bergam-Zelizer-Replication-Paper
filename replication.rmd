@@ -115,6 +115,21 @@ gt(table3)
 
 ### Table 4
 
+```{r}
+
+x <- stan_lm(cosp ~ treatment + bill + leg, data = subset(df , office.size > 1), weights=ipw, refresh = FALSE, prior = NULL)
+
+#summary(x, digits = 10)
+
+coef <- x$coefficients[c('treatment1.0','treatment0.1','treatment1.1')]
+ses <- x$ses[c('treatment1.0','treatment0.1','treatment1.1')]
+
+coef
+ses
+
+```
+
+
 ```{r Table 4, cache = TRUE}
 
 ### x <- stan_lm(cosp ~ treatment + bill + leg, data = subset(df , office.size > 1), weights=ipw, refresh = FALSE, prior = NULL)
@@ -213,7 +228,28 @@ gt(table4)
 
 ```
 
+
 ### Table 5
+
+```{r}
+
+y1 <- stan_lm(lm(cosp ~ treatment + bill + leg, data = subset(df , office.size > 1 & passed==0), weights=ipw), refresh = FALSE, prior = NULL)
+
+y2 <- stan_lm(lm(cosp ~ treatment + bill + leg, data = subset(df , office.size > 1 & passed==1), weights=ipw), refresh = FALSE, prior = NULL)
+
+#summary(x, digits = 10)
+
+y1_coef <- y1$coefficients[c('treatment1.0','treatment0.1','treatment1.1')]
+y1_ses <- y1$ses[c('treatment1.0','treatment0.1','treatment1.1')]
+y2_coef <- y2$coefficients[c('treatment1.0','treatment0.1','treatment1.1')]
+y2_ses <- y2$ses[c('treatment1.0','treatment0.1','treatment1.1')]
+
+y1_coef
+y1_ses
+y2_coef
+y2_ses
+
+```
 
 ```{r Table 5, cache = TRUE}
 
@@ -303,6 +339,46 @@ gt(table5)
 
 ### Table 6
 
+```{r}
+
+z1 <- lm(cosp ~ treatment + bill + leg, 
+   data = subset(df , office.size > 1 & 
+                   !is.na(t.spill.desk) &
+                   !is.na(t.spill.dist) &
+                   !is.na(t.spill.ideo)),
+   weights=ipw)
+
+z2 <- lm(cosp ~ treatment.desk + bill + leg,
+   data = subset(df , office.size > 1 &
+                   !is.na(t.spill.desk) &
+                   !is.na(t.spill.dist) &
+                   !is.na(t.spill.ideo)),
+   weights=ipw.desk)
+
+z3 <- lm(cosp ~ treatment.dist + bill + leg,
+   data = subset(df , office.size > 1 &
+                   !is.na(t.spill.desk) &
+                   !is.na(t.spill.dist) &
+                   !is.na(t.spill.ideo)),
+   weights=ipw.desk)
+
+z1_coef <- z1$coefficients[c('treatment1.0','treatment0.1','treatment1.1')]
+z1_ses <- z1$ses[c('treatment1.0','treatment0.1','treatment1.1')]
+z2_coef <- z2$coefficients[c('treatment.desk1.0','treatment.desk0.1','treatment.desk1.1')]
+z2_ses <- z2$ses[c('treatment.desk1.0','treatment.desk0.1','treatment.desk1.1')]
+z3_coef <- z3$coefficients[c('treatment.dist1.0','treatment.dist0.1','treatment.dist1.1')]
+z3_ses <- z3$ses[c('treatment.dist1.0','treatment.dist0.1','treatment.dist1.1')]
+
+z1_coef
+z1_ses
+z2_coef
+z2_ses
+z3_coef
+z3_ses
+
+```
+
+
 ```{r Table 6, cache = TRUE}
 
 ### This function creates simulation-based inverse probability weights.
@@ -389,7 +465,7 @@ ri.t2 <- array(NA, dim = c(3 , 4, 50), #originally ncol(ri.t.spill.desk)
                  c("office","desk","distance","ideology"),
                  c(1:50)))
 
-for(i in 1:25){ #ncol(ri.t.spill.desk
+for(i in 1:25){ #ncol(ri.t.spill.desk)
   tempdf <- df[,c("bill","cosp","office.size","leg")]
   tempdf$t <- t.for.ri[,i]
   tempdf$t.spill <- t.spill.for.ri[,i]
