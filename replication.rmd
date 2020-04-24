@@ -44,9 +44,9 @@ for(i in 1:ncol(t.for.ri)){
   #cat("\r", i, "of", ncol(t.for.ri)) ### How far loop has progressed
 }
 df$treatment <- interaction(df$t,df$t.spill)
-levels(t.for.ri[,1])
-levels(t.spill.for.ri[,1])
-levels(df$treatment)
+#levels(t.for.ri[,1])
+#levels(t.spill.for.ri[,1])
+#levels(df$treatment)
 
 ```
 
@@ -121,11 +121,20 @@ x <- stan_lm(cosp ~ treatment + bill + leg, data = subset(df , office.size > 1),
 
 #summary(x, digits = 10)
 
-coef <- x$coefficients[c('treatment1.0','treatment0.1','treatment1.1')]
-ses <- x$ses[c('treatment1.0','treatment0.1','treatment1.1')]
+x_coef <- x$coefficients[c('treatment1.0','treatment0.1','treatment1.1')]
+x_ses <- x$ses[c('treatment1.0','treatment0.1','treatment1.1')]
 
-coef
-ses
+x_final <- rbind(x_coef, x_ses)
+x_final <- as_tibble(x_final)
+
+x_final <- x_final %>%
+  mutate(Combined = round(`treatment1.1` * 100, 2),
+         Briefing = round(`treatment1.0` * 100, 2),
+         `Cue-Taking` = round(`treatment0.1` * 100, 2),
+         Value = c("ITT", "SE")) %>%
+  select(Value, Briefing, `Cue-Taking`, Combined)
+
+x_final
 
 ```
 
