@@ -134,7 +134,7 @@ x_final <- x_final %>%
          Value = c("ITT", "SE")) %>%
   select(Value, Briefing, `Cue-Taking`, Combined)
 
-x_final
+gt(x_final)
 
 ```
 
@@ -253,10 +253,21 @@ y1_ses <- y1$ses[c('treatment1.0','treatment0.1','treatment1.1')]
 y2_coef <- y2$coefficients[c('treatment1.0','treatment0.1','treatment1.1')]
 y2_ses <- y2$ses[c('treatment1.0','treatment0.1','treatment1.1')]
 
-y1_coef
-y1_ses
-y2_coef
-y2_ses
+y_final <- rbind(y1_coef, y1_ses, y2_coef, y2_ses)
+y_final <- as_tibble(y_final)
+
+y_final <- y_final %>%
+  mutate(Combined = round(`treatment1.1` * 100, 2),
+         Briefing = round(`treatment1.0` * 100, 2),
+         `Cue-Taking` = round(`treatment0.1` * 100, 2),
+         Value = c("ITT", "SE", "ITT", "SE"),
+         `Reached Floor?` = c("Bills that failed in committee",
+                              "",
+                              "Bills that reached floor",
+                              "")) %>%
+  select(`Reached Floor?`, Value, Briefing, Combined, `Cue-Taking`)
+
+gt(y_final)
 
 ```
 
