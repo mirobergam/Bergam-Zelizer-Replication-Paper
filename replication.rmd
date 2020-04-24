@@ -353,7 +353,22 @@ table5 <- rbind(cat5, cat10, cat15, cat6, cat12, cat18) %>%
   select(`Reached Floor?`, Condition, `ITT(SE)`)  %>%
   pivot_wider(names_from = `Reached Floor?`, values_from = `ITT(SE)`)
 
-gt(table5)
+
+y_final <- rbind(y1_coef, y1_ses, y2_coef, y2_ses)
+y_final <- as_tibble(y_final)
+
+y_final <- y_final %>%
+  mutate(Combined = round(`treatment1.1` * 100, 2),
+         Briefing = round(`treatment1.0` * 100, 2),
+         `Cue-Taking` = round(`treatment0.1` * 100, 2),
+         Value = c("ITT", "SE", "ITT", "SE"),
+         `Reached Floor?` = c("Bills that failed in committee",
+                              "",
+                              "Bills that reached floor",
+                              "")) %>%
+  select(`Reached Floor?`, Value, Briefing, Combined, `Cue-Taking`)
+
+gt(y_final)
 
 ```
 
@@ -382,19 +397,41 @@ z3 <- lm(cosp ~ treatment.dist + bill + leg,
                    !is.na(t.spill.ideo)),
    weights=ipw.desk)
 
-z1_coef <- z1$coefficients[c('treatment1.0','treatment0.1','treatment1.1')]
-z1_ses <- z1$ses[c('treatment1.0','treatment0.1','treatment1.1')]
-z2_coef <- z2$coefficients[c('treatment.desk1.0','treatment.desk0.1','treatment.desk1.1')]
-z2_ses <- z2$ses[c('treatment.desk1.0','treatment.desk0.1','treatment.desk1.1')]
-z3_coef <- z3$coefficients[c('treatment.dist1.0','treatment.dist0.1','treatment.dist1.1')]
-z3_ses <- z3$ses[c('treatment.dist1.0','treatment.dist0.1','treatment.dist1.1')]
+z4 <- lm(cosp ~ treatment.ideo + bill + leg,
+         data = subset(df , office.size > 1 &
+                         !is.na(t.spill.desk) &
+                         !is.na(t.spill.dist) &
+                         !is.na(t.spill.ideo)),
+         weights=ipw.ideo)
 
-z1_coef
-z1_ses
-z2_coef
-z2_ses
-z3_coef
-z3_ses
+z1_coef <- z1$coefficients[c('treatment1.0','treatment0.1','treatment1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+
+z1_ses <- z1$residuals[c('treatment1.0','treatment0.1','treatment1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+
+z2_coef <- z2$coefficients[c('treatment.desk1.0','treatment.desk0.1','treatment.desk1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+
+z2_ses <- z2$residuals[c('treatment.desk1.0','treatment.desk0.1','treatment.desk1.1')]%>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+
+z3_coef <- z3$coefficients[c('treatment.dist1.0','treatment.dist0.1','treatment.dist1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+
+z3_ses <- z3$residuals[c('treatment.dist1.0','treatment.dist0.1','treatment.dist1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+
+z4_coef <- z4$coefficients[c('treatment.ideo1.0','treatment.ideo0.1','treatment.ideo1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+
+z4_ses <- z4$residuals[c('treatment.ideo1.0','treatment.ideo0.1','treatment.ideo1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+
+z_final <- z1_coef %>%
+  mutate(value = c("Briefing", "Cue-Taking", "Combined"),
+        `Offices` = z1_coef$value,
+        `Office SE`= z1_ses$value,
+        `Desks`= z2_coef$value,
+        `Desks SE`= z2_ses$value,
+        `Districts`= z3_coef$value,
+        `Districts SE`= z3_ses$value,
+        `Ideology`= z4_coef$value,
+        `Ideology SE`= z4_ses$value)
+
+gt(z_final)
 
 ```
 
