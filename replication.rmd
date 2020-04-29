@@ -34,7 +34,7 @@ library(rstanarm)
 
 ```{r Import Data}
 
-load("Cue-taking/zelizer_replication_data_IPC.RData")
+load("Original-Data-and-Code/zelizer_replication_data_IPC.RData")
 
 df$t <- relevel(as.factor(df$t) , ref = 2) ### Relevel factors so control is base category; Direct treatment: -1 is advocate; 0 is control; 1 is staffer
 df$t.spill <- relevel(as.factor(df$t.spill) , ref = 2) ### Indirect treatment:  -1 is advocate; 0 is control; 1 is staffer; 2 is double staffer
@@ -69,18 +69,19 @@ coefficient estimates more easily reproducable.
 Studies as early as Matthews and Stimson (1975) and Kingdon (1973) find that
 cue-taking has a large influence on the decisions made by policy-makers. Kingdon
 concluded that cue-taking influences around 40% of decisions while Matthews and
-Stimsonn pinned the number a 75%. More recent observational studies like Masket
+Stimson pinned the number around 75%. More recent observational studies like Masket
 (2008) found the percentage of votes influenced by cue-taking to be 10%. Masket
 found that information was shared primarily through deskmates, while Matthews
-and Stimson found that it wa shared between friends. Coppock (2014) found that
-information wa shared between ideologically-similar legislators. This paper
-abets the conclusion that cue-taking influences policy decisions while updating
-the approach and contributing a new layer of findings. It uses a large dataset
-from two legislative field experiments, lending it power that previous studies
-may have lacked, and focuses on legislators who share office suites. The paper
-contributes the findings that that cues complement complement rather than
-substitute other sources of expertise as well as that cue-making's influence
-occurs late in the decision-making process.
+and Stimson found that it was shared between friends. Coppock (2014) found that
+information was shared between ideologically-similar legislators. 
+
+This paper abets the conclusion that cue-taking influences policy decisions
+while updating the approach and contributing a new layer of findings. It uses a
+large dataset from two legislative field experiments, lending it power that
+previous studies may have lacked, and focuses on legislators who share office
+suites. The paper contributes the findings that that cues complement complement
+rather than substitute other sources of expertise as well as that cue-making's
+influence occurs late in the decision-making process.
 
 ^[[All analysis for this paper is availible at https://github.com/mirobergam/Replication-paper](https://github.com/mirobergam/Replication-paper)]
 
@@ -258,7 +259,7 @@ ipw.function <- function(DATASET , T , T.SPILL , RI.T , RI.T.SPILL , VARNAME){
 	return(DATASET)
 }
 
-load("Cue-taking/replication_data_alternative_spillover_simulations.RData")
+load("Original-Data-and-Code/replication_data_alternative_spillover_simulations.RData")
 ### Add IPWs for observed assignments
 df <- ipw.function(df , "t" , "t.spill.desk" , t.for.ri , ri.t.spill.desk , "ipw.desk")
 df <- ipw.function(df , "t" , "t.spill.dist" , t.for.ri , ri.t.spill.dist , "ipw.dist")
@@ -437,7 +438,7 @@ gt(table61)
 
 ```{r}
 
-load("Cue-taking/zelizer_replication_data_dates_IPC.RData")
+load("Original-Data-and-Code/zelizer_replication_data_dates_IPC.RData")
 
 nsims <- 10 #This was at 1000 before
 
