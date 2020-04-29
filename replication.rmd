@@ -43,12 +43,8 @@ df$t.spill <- relevel(as.factor(df$t.spill) , ref = 2) ### Indirect treatment:  
 for(i in 1:ncol(t.for.ri)){
   t.for.ri[,i] <- relevel(as.factor(t.for.ri[,i]) , ref = 2)
   t.spill.for.ri[,i] <- relevel(as.factor(t.spill.for.ri[,i]) , ref = 2)
-  #cat("\r", i, "of", ncol(t.for.ri)) ### How far loop has progressed
 }
 df$treatment <- interaction(df$t,df$t.spill)
-#levels(t.for.ri[,1])
-#levels(t.spill.for.ri[,1])
-#levels(df$treatment)
 
 ```
 
@@ -59,21 +55,26 @@ addition to other credible sources of information like briefings, influence
 their policymaking decisions. I succesfully replicated Zelizer’s results. This
 extension not only Zelizer took a Bayesian approach to his findings, running a
 large number of simulations for each table using for-loops to produce estimates
-and standard deviations; however, this made his code inefficient and slow. I
-used the rstanarm package to simplify his code and match the results as a
-robustness check. Finally, I graphed the posterior predictive distributions to
-analyze overall a Bayesian approach to this study. This extension served as both
-a robustness test of Zelizer's results and a simplification that makes the
-coefficient estimates more easily reproducable.
-
+and standard deviations; however, this made his code very slow and hard to run.
+I used the rstanarm package to both simplify his code and to match his results
+as a robustness check. Finally, I graphed the posterior predictive distributions
+to analyze overall the Bayesian approach to this study. This paper serves as a
+robustness test of Zelizer's results, a simplification that makes the
+coefficient estimates more easily reproducable, and an analysis of the study's
+Bayesian model.
 
 # Introduction
+
+Zelizer (2019) contributes to a body of literature identifying cue-taking from other legislators as an influential source of information in legislator's own policy-making experience. Zelizer uses 'inferference' -- the experimental nuisance of units interacting and affecting one another -- as an opportunity to measure cue-taking. His first treatment variable, then, is whether or not the legislator shares an office suite, as self-selecting to be in an office suite and sharing a space with somebody will inevitably lead to the exchange of ideas. The seconnd treatment variable is whether or not the  legislators were briefed on a particular bill. With this, the paper contributes the literature by finding that cues complement rather than substitute other sources of expertise, such as briefings. 
+
+I successfully replicated his results. We both used R, although I more heavily utilized the tidyverse, gt, and rstanarm packages. I retrieved his code and data from its posting on the Harvard Dataverse. My replication materials are all located in my Github repo. Although I could successfully replicate every result using his data, the models I used in this paper fail to accurately recreate his standard error due to a fundamental difference in our models. 
+
+In addition to simplifying his code while maintaining its Bayesian framework, producing the same coefficients served as a robustness test for Zelizer's findings. I also graphed the posterior predictions for each model, visualizing how our respective Bayesian approaches are fitting albeit imperfect given the dataset. 
+
 
 The first paragraph is a review of the paper you are replicating. Flesh out the details. Tell us about the data and the model. Place it within the relevant literature, via a key citation or two. Highlight implications and caveats. Again, it is hard to summarize a 25 page paper in a paragraph. Do your best. Note that the paper’s own abstract is often a useful guide.
 
 The second paragraph provides more details on your replications. Mention that you used R, and provide an citation to R in your bibliography. (See citation().) Cite the location from which you got the data and code for your replication. (This might be to the Dataverse, a webpage or “personal communication” with the author.) Provide a footnote with a link to your repo.
-
-The third and fourth paragraphs are more flexible. Indeed, they might be only one paragraph or they might be several. What did you do? What did you find?
 
 The final paragraph is different between the introduction and the conclusion. In the introduction, it may not even exist! (We don’t want to be overly didactic here. There are many ways to write a great paper.) Or it may just provide a roadmap to the rest of the paper. In the conclusion, the last paragraph is where you get to speculate: What does it all mean? What should we research next?
 
@@ -82,19 +83,20 @@ The final paragraph is different between the introduction and the conclusion. In
 Studies as early as Matthews and Stimson (1975) and Kingdon (1973) find that
 cue-taking has a large influence on the decisions made by policy-makers. Kingdon
 concluded that cue-taking influences around 40% of decisions while Matthews and
-Stimson pinned the number around 75%. More recent observational studies like Masket
-(2008) found the percentage of votes influenced by cue-taking to be 10%. Masket
-found that information was shared primarily through deskmates, while Matthews
-and Stimson found that it was shared between friends. Coppock (2014) found that
-information was shared between ideologically-similar legislators. 
+Stimson pinned the number around 75%. More recent observational studies like
+Masket (2008) found the percentage of votes influenced by cue-taking to be 10%.
+Masket found that information was shared primarily through deskmates, while
+Matthews and Stimson found that it was shared between friends. Coppock (2014)
+found that information was shared between ideologically-similar legislators.
 
 This paper abets the conclusion that cue-taking influences policy decisions
 while updating the approach and contributing a new layer of findings. It uses a
 large dataset from two legislative field experiments, lending it power that
 previous studies may have lacked, and focuses on legislators who share office
-suites. The paper contributes the findings that that cues complement complement
-rather than substitute other sources of expertise as well as that cue-making's
-influence occurs late in the decision-making process.
+suites as a measure of their influence on one another. The paper contributes the
+findings that that cues complement rather than substitute other sources of
+expertise as well as that cue-making's influence occurs late in the
+decision-making process.
 
 # Replication
 
@@ -167,6 +169,41 @@ Zelizer and I use to produce our coefficient results is a flawed but accruate
 way of fitting the data.
 
 # Conclusion
+
+# Introduction
+
+Zelizer (2019) contributes to a body of literature identifying cue-taking from other legislators as an influential source of information in legislator's own policy-making experience. Zelizer uses 'inferference' -- the experimental nuisance of units interacting and affecting one another -- as an opportunity to measure cue-taking. His first treatment variable, then, is whether or not the legislator shares an office suite, as self-selecting to be in an office suite and sharing a space with somebody will inevitably lead to the exchange of ideas. The seconnd treatment variable is whether or not the  legislators were briefed on a particular bill. With this, the paper contributes the literature by finding that cues complement rather than substitute other sources of expertise, such as briefings. 
+
+I successfully replicated his results. We both used R, although I more heavily utilized the tidyverse, gt, and rstanarm packages. I retrieved his code and data from its posting on the Harvard Dataverse. My replication materials are all located in my Github repo. Although I could successfully replicate every result using his data, the models I used in this paper fail to accurately recreate his standard error due to a fundamental difference in our models. 
+
+In addition to simplifying his code while maintaining its Bayesian framework, producing the same coefficients served as a robustness test for Zelizer's findings. I also graphed the posterior predictions for each model, visualizing how our respective Bayesian approaches are fitting albeit imperfect given the dataset. 
+
+
+The first paragraph is a review of the paper you are replicating. Flesh out the details. Tell us about the data and the model. Place it within the relevant literature, via a key citation or two. Highlight implications and caveats. Again, it is hard to summarize a 25 page paper in a paragraph. Do your best. Note that the paper’s own abstract is often a useful guide.
+
+The second paragraph provides more details on your replications. Mention that you used R, and provide an citation to R in your bibliography. (See citation().) Cite the location from which you got the data and code for your replication. (This might be to the Dataverse, a webpage or “personal communication” with the author.) Provide a footnote with a link to your repo.
+
+The final paragraph is different between the introduction and the conclusion. In the introduction, it may not even exist! (We don’t want to be overly didactic here. There are many ways to write a great paper.) Or it may just provide a roadmap to the rest of the paper. In the conclusion, the last paragraph is where you get to speculate: What does it all mean? What should we research next?
+
+# Literature Review
+
+Studies as early as Matthews and Stimson (1975) and Kingdon (1973) find that
+cue-taking has a large influence on the decisions made by policy-makers. Kingdon
+concluded that cue-taking influences around 40% of decisions while Matthews and
+Stimson pinned the number around 75%. More recent observational studies like
+Masket (2008) found the percentage of votes influenced by cue-taking to be 10%.
+Masket found that information was shared primarily through deskmates, while
+Matthews and Stimson found that it was shared between friends. Coppock (2014)
+found that information was shared between ideologically-similar legislators.
+
+This paper abets the conclusion that cue-taking influences policy decisions
+while updating the approach and contributing a new layer of findings. It uses a
+large dataset from two legislative field experiments, lending it power that
+previous studies may have lacked, and focuses on legislators who share office
+suites as a measure of their influence on one another. The paper contributes the
+findings that that cues complement rather than substitute other sources of
+expertise as well as that cue-making's influence occurs late in the
+decision-making process.
 
 ^[[All analysis for this paper is availible at https://github.com/mirobergam/Replication-paper](https://github.com/mirobergam/Replication-paper)]
 
