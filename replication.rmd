@@ -124,20 +124,6 @@ Randomization Inference.
 
 # Extension
 
- this solid line is what the data that i used to the model. discrete values of 0 and 1 explain the bunching. and shows that theres more 0 than ones in your dataset. in the back are the faded lines, they are the bayesian models that ran in the background, trying to fit the data that we provided to it to fit the model. errors with this fit, it goes behind 0 (extrapolation). Bayesian method might not be the best fit for approximinating 
- 
-the solid line is the data
-the faded line is how the model passed in (the one i use) intreprets the data. 
-
-# Conclusion
-
-^[[All analysis for this paper is availible at https://github.com/mirobergam/Replication-paper](https://github.com/mirobergam/Replication-paper)]
-
-
-# Figures 
-
-## Posterior Predictive Distributions
-
 ```{r PPDs}
 
 ppd4 <- pp_check(x, "dens_overlay")
@@ -166,6 +152,25 @@ grid.arrange(ppd4, ppd51, ppd52, ppd61,
 
 ```
 
+In each of the plots above, the darker line shows the distribution of the
+observed data regarding their treatments, cosponsorships, and other variables.
+The more faded lines show the how the model I passed in for each respective plot
+fits their associated data. The resulting finding apply across all of the models
+used in the study: a Bayesian approach is an effective but imperfect way of
+fitting this data to a model. The grey lines shows the Bayesian model use this
+discrete data in non-discrete ways, as seen by the continuous distributions.
+Additionally, it extrapolates the data, producing results that are below zero
+despite the data not dipping below 0. However, the peaks of the two lines both
+consistently center around the same value (around 0), showing that it is
+somewhat accruate. As a result, I've determined that the Bayesian model both
+Zelizer and I use to produce our coefficient results is a flawed but accruate
+way of fitting the data.
+
+# Conclusion
+
+^[[All analysis for this paper is availible at https://github.com/mirobergam/Replication-paper](https://github.com/mirobergam/Replication-paper)]
+
+# Figures 
 
 ## Table 3
 
