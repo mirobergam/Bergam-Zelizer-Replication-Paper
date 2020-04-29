@@ -29,6 +29,8 @@ library(dplyr)
 library(Hmisc)
 library(gt)
 library(rstanarm)
+library(gtable)
+library(grid)
 
 ```
 
@@ -50,7 +52,7 @@ df$treatment <- interaction(df$t,df$t.spill)
 
 ```
 
-## Abstract
+# Abstract
 
 Zelizer (2019) finds that the cues that legislators take from their peers, in
 addition to other credible sources of information like briefings, influence
@@ -65,7 +67,7 @@ a robustness test of Zelizer's results and a simplification that makes the
 coefficient estimates more easily reproducable.
 
 
-## Introduction
+# Introduction
 
 The first paragraph is a review of the paper you are replicating. Flesh out the details. Tell us about the data and the model. Place it within the relevant literature, via a key citation or two. Highlight implications and caveats. Again, it is hard to summarize a 25 page paper in a paragraph. Do your best. Note that the paper’s own abstract is often a useful guide.
 
@@ -75,7 +77,7 @@ The third and fourth paragraphs are more flexible. Indeed, they might be only on
 
 The final paragraph is different between the introduction and the conclusion. In the introduction, it may not even exist! (We don’t want to be overly didactic here. There are many ways to write a great paper.) Or it may just provide a roadmap to the rest of the paper. In the conclusion, the last paragraph is where you get to speculate: What does it all mean? What should we research next?
 
-## Literature Review
+# Literature Review
 
 Studies as early as Matthews and Stimson (1975) and Kingdon (1973) find that
 cue-taking has a large influence on the decisions made by policy-makers. Kingdon
@@ -94,7 +96,7 @@ suites. The paper contributes the findings that that cues complement complement
 rather than substitute other sources of expertise as well as that cue-making's
 influence occurs late in the decision-making process.
 
-## Replication
+# Replication
 
 I was able to match all of the coefficient estimates from the original paper in
 my replicated figures. Zelizer gathers his Bayesian estimates using for-loops
@@ -120,15 +122,52 @@ errors that don't take into consideration implicit clustering. Zelizer's more
 accurate method works arounnd this issue using a particular form of
 Randomization Inference.
 
-## Extension
+# Extension
 
-## Conclusion
+ this solid line is what the data that i used to the model. discrete values of 0 and 1 explain the bunching. and shows that theres more 0 than ones in your dataset. in the back are the faded lines, they are the bayesian models that ran in the background, trying to fit the data that we provided to it to fit the model. errors with this fit, it goes behind 0 (extrapolation). Bayesian method might not be the best fit for approximinating 
+ 
+the solid line is the data
+the faded line is how the model passed in (the one i use) intreprets the data. 
+
+# Conclusion
 
 ^[[All analysis for this paper is availible at https://github.com/mirobergam/Replication-paper](https://github.com/mirobergam/Replication-paper)]
 
 
-## Figures 
-### Table 3
+# Figures 
+
+## Posterior Predictive Distributions
+
+```{r PPDs}
+
+ppd4 <- pp_check(x, "dens_overlay")
+
+ppd51 <- pp_check(y1, "dens_overlay")
+
+ppd52 <- pp_check(y2, "dens_overlay")
+
+ppd61 <- pp_check(z1, "dens_overlay")
+
+ppd62 <- pp_check(z2, "dens_overlay")
+
+ppd63 <- pp_check(z3, "dens_overlay")
+
+ppd64 <- pp_check(z4, "dens_overlay")
+
+grid.arrange(ppd4, ppd51, ppd52, ppd61,
+             ppd62, ppd63, ppd64,
+             ncol = 2,
+             nrow = 4,
+             top = textGrob("Posterior Predictive Distributions For All Models",
+                            gp = gpar(fontsize = 18)),
+             bottom = textGrob("Models from left to right: Table 4, Table 5 (bill didn't pass), Table 5 (bill passed),
+                               Table 6 (Offices), Table 6 (Desks), Table 6 (Districts), Table 6 (Ideology)",
+                            gp = gpar(fontsize = 9)))
+
+```
+
+
+## Table 3
 
 ```{r Table 3}
 
@@ -161,7 +200,7 @@ gt(table3) %>%
 
 ```
 
-### Table 4
+## Table 4
 
 ```{r}
 
@@ -194,7 +233,7 @@ gt(x_final) %>%
 
 ```
 
-### Table 5
+## Table 5
 
 ```{r Table 5}
 
@@ -232,7 +271,7 @@ gt(y_final) %>%
 
 ```
 
-### Table 6
+## Table 6
 
 ```{r}
 
@@ -306,198 +345,7 @@ gt(z_final) %>%
 
 ```
 
-
-```{r Table 6, cache = TRUE}
-
-### This function creates simulation-based inverse probability weights.
-ipw.function <- function(DATASET , T , T.SPILL , RI.T , RI.T.SPILL , VARNAME){
-	temp <- apply(matrix(1:ncol(RI.T.SPILL) , nrow=1) , 2 , function(z) {
-		temp1 <- as.numeric(RI.T.SPILL[,z]==DATASET[,T.SPILL])
-		temp2 <- as.numeric(RI.T[,z]==DATASET[,T])
-		return(as.numeric(temp1+temp2==2))
-	})
-
-	DATASET$V1 <- 1/apply(temp , 1 , mean)
-	setnames(DATASET,"V1",VARNAME)
-	return(DATASET)
-}
-
-load("Original-Data-and-Code/replication_data_alternative_spillover_simulations.RData")
-### Add IPWs for observed assignments
-df <- ipw.function(df , "t" , "t.spill.desk" , t.for.ri , ri.t.spill.desk , "ipw.desk")
-df <- ipw.function(df , "t" , "t.spill.dist" , t.for.ri , ri.t.spill.dist , "ipw.dist")
-df <- ipw.function(df , "t" , "t.spill.ideo" , t.for.ri , ri.t.spill.ideo , "ipw.ideo")
-
-table(df$t.spill,useNA="always")
-table(df$t.spill.desk,useNA="always")
-table(df$t.spill.dist,useNA="always")
-table(df$t.spill.ideo,useNA="always")
-
-df$treatment.desk <- relevel(interaction(df$t,df$t.spill.desk) , ref = 4)
-df$treatment.dist <- relevel(interaction(df$t,df$t.spill.dist) , ref = 4)
-df$treatment.ideo <- relevel(interaction(df$t,df$t.spill.ideo) , ref = 4)
-
-estimates <- data.frame(itt = matrix(NA,nrow=3,ncol=4))
-row.names(estimates) <- c("t","t.spill","t+t.spill")
-colnames(estimates) <- c("office","desk","distance","ideology")
-
-### Office Spillover
-estimates[1:3,1] <- unlist( summary(lm(cosp ~ treatment + bill + leg,
-                      data = subset(df , office.size > 1 &
-                                      !is.na(t.spill.desk) &
-                                      !is.na(t.spill.dist) &
-                                      !is.na(t.spill.ideo)),
-                      weights=ipw))$coef[c('treatment1.0',
-                                           'treatment0.1',
-                                           'treatment1.1'),
-                                           'Estimate'] )
-
-### Desk Spillover
-estimates[1:3,2] <- unlist( summary(lm(cosp ~ treatment.desk + bill + leg,
-                      data = subset(df , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw.desk))$coef[c('treatment.desk1.0',
-                                                'treatment.desk0.1',
-                                                'treatment.desk1.1'),
-                                                'Estimate'] )
-
- ### Distance Spillover
-estimates[1:3,3] <- unlist( summary(lm(cosp ~ treatment.dist + bill + leg,
-                      data = subset(df , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw.dist))$coef[c('treatment.dist1.0',
-                                                'treatment.dist0.1',
-                                                'treatment.dist1.1'),
-                                                'Estimate'] )
-
-### Ideology Spillover
-estimates[1:3,4] <- unlist( summary(lm(cosp ~ treatment.ideo + bill + leg,
-                      data = subset(df , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw.ideo))$coef[c('treatment.ideo1.0',
-                                                'treatment.ideo0.1',
-                                                'treatment.ideo1.1'),
-                                                'Estimate'] )
-
-#######################               RI           ##########################
-
-ri.t2 <- array(NA, dim = c(3 , 4, 50), #originally ncol(ri.t.spill.desk)
-               dimnames = list(
-                 c("t","t.spill","t+t.spill"),
-                 c("office","desk","distance","ideology"),
-                 c(1:50)))
-
-for(i in 1:25){ #ncol(ri.t.spill.desk)
-  tempdf <- df[,c("bill","cosp","office.size","leg")]
-  tempdf$t <- t.for.ri[,i]
-  tempdf$t.spill <- t.spill.for.ri[,i]
-  tempdf$ipw <- ipw.for.ri[,i]
-
-  tempdf$t.spill.desk <- ri.t.spill.desk[,i]
-  tempdf$t.spill.dist <- ri.t.spill.dist[,i]
-  tempdf$t.spill.ideo <- ri.t.spill.ideo[,i]
-
-
-  tempdf <- ipw.function(tempdf , "t" , "t.spill.desk" , t.for.ri , ri.t.spill.desk , "ipw.desk")
-  tempdf <- ipw.function(tempdf , "t" , "t.spill.dist" , t.for.ri , ri.t.spill.dist , "ipw.dist")
-  tempdf <- ipw.function(tempdf , "t" , "t.spill.ideo" , t.for.ri , ri.t.spill.ideo , "ipw.ideo")
-  tempdf$treatment <- interaction(tempdf$t,tempdf$t.spill)
-  tempdf$treatment.desk <- interaction(tempdf$t,tempdf$t.spill.desk)
-  tempdf$treatment.dist <- interaction(tempdf$t,tempdf$t.spill.dist)
-  tempdf$treatment.ideo <- interaction(tempdf$t,tempdf$t.spill.ideo)
-  #print(levels(tempdf$treatment.ideo)[1])
-  #print(levels(tempdf$treatment.desk)[1])
-  #print(levels(tempdf$treatment.dist)[1])
-
-  ### Office Spillover
-  ri.t2[1:3,1,i] <- unlist( summary(lm(cosp ~ treatment + bill + leg,
-                      data = subset(tempdf , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw))$coef[c('treatment1.0',
-                                           'treatment0.1',
-                                           'treatment1.1'),
-                                           'Estimate'] )
-
-  ### Desk Spillover
-  ri.t2[1:3,2,i] <- unlist( summary(lm(cosp ~ treatment.desk + bill + leg,
-                      data = subset(tempdf , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw.desk))$coef[c('treatment.desk1.0',
-                                                'treatment.desk0.1',
-                                                'treatment.desk1.1'),'Estimate'] )
-
-  ### Distance Spillover
-  ri.t2[1:3,3,i] <- unlist( summary(lm(cosp ~ treatment.dist + bill + leg,
-                      data = subset(tempdf , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw.dist))$coef[c('treatment.dist1.0',
-                                                'treatment.dist0.1',
-                                                'treatment.dist1.1'),
-                                                'Estimate'] )
-
-  ### Ideology Spillover
-  ri.t2[1:3,4,i] <- unlist( summary(lm(cosp ~ treatment.ideo + bill + leg,
-                      data = subset(tempdf , office.size > 1 &
-                                     !is.na(t.spill.desk) &
-                                     !is.na(t.spill.dist) &
-                                     !is.na(t.spill.ideo)),
-                      weights=ipw.ideo))$coef[c('treatment.ideo1.0',
-                                                'treatment.ideo0.1',
-                                                'treatment.ideo1.1'),
-                                                'Estimate'] )
-
-  #cat("\r", i, "of", ncol(ri.t.spill.desk)) ### How far loop has progressed
-}
-
-### Table 6:
-for(j in 1:4){
-  print(colnames(estimates)[j])
-  for(i in 1:3){
-  print(row.names(estimates)[i])
-  assign(paste0("owl", i * (j+6)), 
-  data.frame(
-  	 st = estimates[i,j] ,
-  	SD = sd(ri.t2[i,j,])
-  ))
-  }}
-
-table6 <- rbind(owl7, owl8, owl9, owl10, owl14, owl16,
-                owl18, owl20, owl21, owl24, owl27, owl30) %>%
-  mutate(Condition = c("Briefing","Briefing","Briefing","Briefing",
-                       "Cue-Taking","Cue-Taking","Cue-Taking","Cue-Taking",
-                       "Combined", "Combined", "Combined", "Combined"),
-         Model = c("Offices", "Desks", "Districts", "Ideology",
-                   "Offices", "Desks", "Districts", "Ideology",
-                   "Offices", "Desks", "Districts", "Ideology"),
-         ITT = round((st * 100),3),
-         SE = round((SD * 100),3)) %>%
-  select(Model, Condition, ITT, SE)
-
-table61 <- table6 %>%
-  mutate(ITT = as.character(ITT)) %>%
-  mutate(SE = as.character(SE)) %>%
-  mutate(`ITT(SE)` = paste(ITT," (", SE, ")")) %>%
-  select(Model, Condition, `ITT(SE)`)  %>%
-  pivot_wider(names_from = Model, values_from = `ITT(SE)`)
-
-gt(table61)
-
-```
-
-
-### Figure 3
+## Figure 3
 
 ```{r}
 
@@ -562,7 +410,7 @@ data.frame(ATE = days.ri[,tempnum],
 
 ```
 
-### Figure 4
+## Figure 4
 
 ```{r}
 
@@ -597,6 +445,6 @@ data.frame(ATE = days.ri[,tempnum],
 
 ```
 
-### Bibliography
+## Bibliography
 
 @main_paper @side_paper_1 @side_paper_2 @side_paper_3 @side_paper_4
