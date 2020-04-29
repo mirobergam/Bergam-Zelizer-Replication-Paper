@@ -67,19 +67,21 @@ Bayesian model.
 
 Zelizer (2019) contributes to a body of literature identifying cue-taking from
 other legislators as an influential source of information in legislator's own
-policy-making experience. Zelizer uses 'inferference' -- the experimental
-nuisance of units interacting and affecting one another -- as an opportunity to
-measure cue-taking. His first treatment variable, then, is whether or not the
-legislator shares an office suite, as self-selecting to be in an office suite
-and sharing a space with another legislator will inevitably lead to the exchange
-of ideas. The second treatment variable is whether or not the legislators were
-briefed on a particular bill. With this, the paper contributes the literature by
-finding that cues complement rather than substitute other sources of expertise,
-such as briefings.
+policy-making experience. Early studies such as Matthews and Stimson (1975)
+@side_paper_1 and Kingdon (1973) @side_paper_2 find that cue-taking has a large
+influence on the decisions made by policy-makers. Zelizer uses 'inferference' --
+the experimental nuisance of units interacting and affecting one another -- as
+an opportunity to measure cue-taking. His first treatment variable, then, is
+whether or not the legislator shares an office suite, as self-selecting to be in
+an office suite and sharing a space with another legislator will inevitably lead
+to the exchange of ideas. The second treatment variable is whether or not the
+legislators were briefed on a particular bill. With this, the paper contributes
+the literature by finding that cues complement rather than substitute other
+sources of expertise, such as briefings.
 
 I successfully replicated his results. We both used R, although I more heavily
-utilized the tidyverse, gt, and rstanarm packages. I retrieved his code and data
-from its posting on the Harvard Dataverse. Although I could successfully
+utilized the tidyverse, gt, and rstanarm packages @r-language. I retrieved his code and data
+from its posting on the Harvard Dataverse @dataverse. Although I could successfully
 replicate every result using his data, the models I used in this paper fail to
 recreate his standard error values due to a fundamental difference in our
 models.
@@ -91,10 +93,6 @@ same coefficients also served as a robustness test for Zelizer's findings.
 Additionally, I graphed the posterior predictions for each model, visualizing
 how our respective Bayesian approaches are fitting albeit imperfect given the
 dataset.
-
-The first paragraph is a review of the paper you are replicating. Flesh out the details. Tell us about the data and the model. Place it within the relevant literature, via a key citation or two. Highlight implications and caveats. Again, it is hard to summarize a 25 page paper in a paragraph. Do your best. Note that the paper’s own abstract is often a useful guide.
-
-The second paragraph provides more details on your replications. Mention that you used R, and provide an citation to R in your bibliography. (See citation().) Cite the location from which you got the data and code for your replication. (This might be to the Dataverse, a webpage or “personal communication” with the author.) Provide a footnote with a link to your repo.
 
 # Literature Review
 
@@ -144,35 +142,8 @@ Randomization Inference.
 
 # Extension
 
-```{r PPDs}
-
-ppd4 <- pp_check(x, "dens_overlay")
-
-ppd51 <- pp_check(y1, "dens_overlay")
-
-ppd52 <- pp_check(y2, "dens_overlay")
-
-ppd61 <- pp_check(z1, "dens_overlay")
-
-ppd62 <- pp_check(z2, "dens_overlay")
-
-ppd63 <- pp_check(z3, "dens_overlay")
-
-ppd64 <- pp_check(z4, "dens_overlay")
-
-grid.arrange(ppd4, ppd51, ppd52, ppd61,
-             ppd62, ppd63, ppd64,
-             ncol = 2,
-             nrow = 4,
-             top = textGrob("Posterior Predictive Distributions For All Models",
-                            gp = gpar(fontsize = 18)),
-             bottom = textGrob("Models from left to right: Table 4, Table 5 (bill didn't pass), Table 5 (bill passed),
-                               Table 6 (Offices), Table 6 (Desks), Table 6 (Districts), Table 6 (Ideology)",
-                            gp = gpar(fontsize = 9)))
-
-```
-
-In each of the plots above, the darker line shows the distribution of the
+See the figure "Posterior Predictive Distributions For All Models" in Appendix.
+In each of the plots, the darker line shows the distribution of the
 observed data regarding their treatments, cosponsorships, and other variables.
 The more faded lines show the how the model I passed in for each respective plot
 fits their associated data. The resulting finding apply across all of the models
@@ -495,6 +466,36 @@ data.frame(ATE = days.ri[,tempnum],
 
 ```
 
+## Posterior Predictive Distributions
+
+```{r PPDs}
+
+ppd4 <- pp_check(x, "dens_overlay")
+
+ppd51 <- pp_check(y1, "dens_overlay")
+
+ppd52 <- pp_check(y2, "dens_overlay")
+
+ppd61 <- pp_check(z1, "dens_overlay")
+
+ppd62 <- pp_check(z2, "dens_overlay")
+
+ppd63 <- pp_check(z3, "dens_overlay")
+
+ppd64 <- pp_check(z4, "dens_overlay")
+
+grid.arrange(ppd4, ppd51, ppd52, ppd61,
+             ppd62, ppd63, ppd64,
+             ncol = 2,
+             nrow = 4,
+             top = textGrob("Posterior Predictive Distributions For All Models",
+                            gp = gpar(fontsize = 18)),
+             bottom = textGrob("Models from left to right: Table 4, Table 5 (bill didn't pass), Table 5 (bill passed),
+                               Table 6 (Offices), Table 6 (Desks), Table 6 (Districts), Table 6 (Ideology)",
+                            gp = gpar(fontsize = 9)))
+
+```
+
 ## Bibliography
 
-@main_paper @side_paper_1 @side_paper_2 @side_paper_3 @side_paper_4
+@main_paper @side_paper_1 @side_paper_2 @dataverse @r-language
