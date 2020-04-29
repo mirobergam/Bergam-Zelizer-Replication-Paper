@@ -153,7 +153,11 @@ table3 <- treatments3 %>% left_join(table3, by = "treatment") %>%
   select(`Cue-Taking`, Briefing, `Mean(N)`)  %>%
   pivot_wider(names_from = `Cue-Taking`, values_from = `Mean(N)`)
 
-gt(table3)
+gt(table3) %>% 
+  tab_header(
+    title = "Table 3",
+    subtitle = "Summary of Cosponsorship by Briefing and Cue-Taking Assignment (in pp)"
+  )
 
 ```
 
@@ -182,7 +186,11 @@ x_final <- x_final %>%
          Value = c("ITT", "SE")) %>%
   select(Value, Briefing, `Cue-Taking`, Combined)
 
-gt(x_final)
+gt(x_final) %>% 
+  tab_header(
+    title = "Table 4",
+    subtitle = "Estimated Briefing and Cue-Taking Effects (in pp)"
+  )
 
 ```
 
@@ -215,7 +223,12 @@ y_final <- y_final %>%
                               "")) %>%
   select(`Reached Floor?`, Value, Briefing, `Cue-Taking`, Combined)
 
-gt(y_final)
+gt(y_final) %>% 
+  tab_header(
+    title = "Table 5",
+    subtitle = "Estimated Briefing and Cue-Taking Effects by Bill Progress (in pp)"
+  )
+
 
 ```
 
@@ -255,32 +268,41 @@ z4 <- stan_lm(cosp ~ treatment.ideo + bill + leg,
 
 z1_coef <- z1$coefficients[c('treatment1.0','treatment0.1','treatment1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
 
-z1_ses <- z1$residuals[c('treatment1.0','treatment0.1','treatment1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+z1_ses <- z1$ses[c('treatment1.0','treatment0.1','treatment1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
 
 z2_coef <- z2$coefficients[c('treatment.desk1.0','treatment.desk0.1','treatment.desk1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
 
-z2_ses <- z2$residuals[c('treatment.desk1.0','treatment.desk0.1','treatment.desk1.1')]%>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+z2_ses <- z2$ses[c('treatment.desk1.0','treatment.desk0.1','treatment.desk1.1')]%>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
 
 z3_coef <- z3$coefficients[c('treatment.dist1.0','treatment.dist0.1','treatment.dist1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
 
-z3_ses <- z3$residuals[c('treatment.dist1.0','treatment.dist0.1','treatment.dist1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+z3_ses <- z3$ses[c('treatment.dist1.0','treatment.dist0.1','treatment.dist1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
 
 z4_coef <- z4$coefficients[c('treatment.ideo1.0','treatment.ideo0.1','treatment.ideo1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
 
-z4_ses <- z4$residuals[c('treatment.ideo1.0','treatment.ideo0.1','treatment.ideo1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
+z4_ses <- z4$ses[c('treatment.ideo1.0','treatment.ideo0.1','treatment.ideo1.1')] %>% as_tibble() %>% mutate(value = value * 100) %>% round(2)
 
 z_final <- z1_coef %>%
-  mutate(value = c("Briefing", "Cue-Taking", "Combined"),
-        `Offices` = z1_coef$value,
-        #`Office SE`= z1_ses$value,
-        `Desks`= z2_coef$value,
-        #`Desks SE`= z2_ses$value,
+  mutate(`Model (SE)` = c("Briefing", "Cue-Taking", "Combined"),
+        `Offices` = as.character(z1_coef$value),
+        `Office SE`= as.character(z1_ses$value),
+        `Office (SE)` = paste(`Offices`," (", `Office SE`, ")"),
+        `Desks`= as.character(z2_coef$value),
+        `Desks SE`= as.character(z2_ses$value),
+        `Desks (SE)` = paste(`Desks`," (", `Desks SE`, ")"),
         `Districts`= z3_coef$value,
-        #`Districts SE`= z3_ses$value,
-        `Ideology`= z4_coef$value)
-        #`Ideology SE`= z4_ses$value)
+        `Districts SE`= z3_ses$value,
+        `Districts (SE)` = paste(`Districts`," (", `Districts SE`, ")"),
+        `Ideology`= z4_coef$value,
+        `Ideology SE`= z4_ses$value,
+        `Ideology (SE)` = paste(`Ideology`," (", `Ideology SE`, ")")) %>%
+  select(`Model (SE)`, `Office (SE)`, `Desks (SE)`, `Districts (SE)`, `Ideology (SE)`)
 
-gt(z_final)
+gt(z_final) %>%
+  tab_header(
+    title = "Table 6",
+    subtitle = "Estimated Briefing and Cue-Taking Effects Under Alternate Spillover Models (in pp)"
+  )
 
 ```
 
