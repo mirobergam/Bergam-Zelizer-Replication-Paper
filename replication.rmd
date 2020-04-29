@@ -65,18 +65,36 @@ Bayesian model.
 
 # Introduction
 
-Zelizer (2019) contributes to a body of literature identifying cue-taking from other legislators as an influential source of information in legislator's own policy-making experience. Zelizer uses 'inferference' -- the experimental nuisance of units interacting and affecting one another -- as an opportunity to measure cue-taking. His first treatment variable, then, is whether or not the legislator shares an office suite, as self-selecting to be in an office suite and sharing a space with somebody will inevitably lead to the exchange of ideas. The seconnd treatment variable is whether or not the  legislators were briefed on a particular bill. With this, the paper contributes the literature by finding that cues complement rather than substitute other sources of expertise, such as briefings. 
+Zelizer (2019) contributes to a body of literature identifying cue-taking from
+other legislators as an influential source of information in legislator's own
+policy-making experience. Zelizer uses 'inferference' -- the experimental
+nuisance of units interacting and affecting one another -- as an opportunity to
+measure cue-taking. His first treatment variable, then, is whether or not the
+legislator shares an office suite, as self-selecting to be in an office suite
+and sharing a space with another legislator will inevitably lead to the exchange
+of ideas. The second treatment variable is whether or not the legislators were
+briefed on a particular bill. With this, the paper contributes the literature by
+finding that cues complement rather than substitute other sources of expertise,
+such as briefings.
 
-I successfully replicated his results. We both used R, although I more heavily utilized the tidyverse, gt, and rstanarm packages. I retrieved his code and data from its posting on the Harvard Dataverse. My replication materials are all located in my Github repo. Although I could successfully replicate every result using his data, the models I used in this paper fail to accurately recreate his standard error due to a fundamental difference in our models. 
+I successfully replicated his results. We both used R, although I more heavily
+utilized the tidyverse, gt, and rstanarm packages. I retrieved his code and data
+from its posting on the Harvard Dataverse. Although I could successfully
+replicate every result using his data, the models I used in this paper fail to
+recreate his standard error values due to a fundamental difference in our
+models.
 
-In addition to simplifying his code while maintaining its Bayesian framework, producing the same coefficients served as a robustness test for Zelizer's findings. I also graphed the posterior predictions for each model, visualizing how our respective Bayesian approaches are fitting albeit imperfect given the dataset. 
-
+I simplified his code using functions from the rstanarm() package to greatly
+lower the amount of time and computing power needed to run his analyses. The
+methods I used maintained the Bayesian framework of the study. My producing the
+same coefficients also served as a robustness test for Zelizer's findings.
+Additionally, I graphed the posterior predictions for each model, visualizing
+how our respective Bayesian approaches are fitting albeit imperfect given the
+dataset.
 
 The first paragraph is a review of the paper you are replicating. Flesh out the details. Tell us about the data and the model. Place it within the relevant literature, via a key citation or two. Highlight implications and caveats. Again, it is hard to summarize a 25 page paper in a paragraph. Do your best. Note that the paper’s own abstract is often a useful guide.
 
 The second paragraph provides more details on your replications. Mention that you used R, and provide an citation to R in your bibliography. (See citation().) Cite the location from which you got the data and code for your replication. (This might be to the Dataverse, a webpage or “personal communication” with the author.) Provide a footnote with a link to your repo.
-
-The final paragraph is different between the introduction and the conclusion. In the introduction, it may not even exist! (We don’t want to be overly didactic here. There are many ways to write a great paper.) Or it may just provide a roadmap to the rest of the paper. In the conclusion, the last paragraph is where you get to speculate: What does it all mean? What should we research next?
 
 # Literature Review
 
@@ -170,40 +188,27 @@ way of fitting the data.
 
 # Conclusion
 
-# Introduction
+Zelizer (2019) identifies cue-taking from other legislators as an influential
+source of information in a legislator's policy-making decision. Making briefings
+a treatment variable in addition to contact with other legislators, Zelizer
+contributes to the literature that cue-taking is a complement rather than
+substitute for other modes of information.
 
-Zelizer (2019) contributes to a body of literature identifying cue-taking from other legislators as an influential source of information in legislator's own policy-making experience. Zelizer uses 'inferference' -- the experimental nuisance of units interacting and affecting one another -- as an opportunity to measure cue-taking. His first treatment variable, then, is whether or not the legislator shares an office suite, as self-selecting to be in an office suite and sharing a space with somebody will inevitably lead to the exchange of ideas. The seconnd treatment variable is whether or not the  legislators were briefed on a particular bill. With this, the paper contributes the literature by finding that cues complement rather than substitute other sources of expertise, such as briefings. 
+I was successful in replication Zelizer's results, although when using my code
+as opposed to his, my standard errors fail to match his as they do not use
+Randomization Inference. In addition to simplifying his code while maintaining
+its Bayesian framework, producing the same coefficients served as a robustness
+test for Zelizer's findings. I also graphed the posterior predictions for each
+model to visualize how our Bayesian approach is a flawed but effective approach
+to this dataset.
 
-I successfully replicated his results. We both used R, although I more heavily utilized the tidyverse, gt, and rstanarm packages. I retrieved his code and data from its posting on the Harvard Dataverse. My replication materials are all located in my Github repo. Although I could successfully replicate every result using his data, the models I used in this paper fail to accurately recreate his standard error due to a fundamental difference in our models. 
+Both approaches to the study come with pros and cons: Zelizer's original code
+allows for a more nuanced calculation of the standard error by using thousands
+of iterations to perform Randomization Inference. However, these iterations make
+the code slow and cumbersome for those looking to replicate the experiment. A
+future extension would involve performing Randomization Inference using the
+quicker, more efficient methods used by the rstanarm package.
 
-In addition to simplifying his code while maintaining its Bayesian framework, producing the same coefficients served as a robustness test for Zelizer's findings. I also graphed the posterior predictions for each model, visualizing how our respective Bayesian approaches are fitting albeit imperfect given the dataset. 
-
-
-The first paragraph is a review of the paper you are replicating. Flesh out the details. Tell us about the data and the model. Place it within the relevant literature, via a key citation or two. Highlight implications and caveats. Again, it is hard to summarize a 25 page paper in a paragraph. Do your best. Note that the paper’s own abstract is often a useful guide.
-
-The second paragraph provides more details on your replications. Mention that you used R, and provide an citation to R in your bibliography. (See citation().) Cite the location from which you got the data and code for your replication. (This might be to the Dataverse, a webpage or “personal communication” with the author.) Provide a footnote with a link to your repo.
-
-The final paragraph is different between the introduction and the conclusion. In the introduction, it may not even exist! (We don’t want to be overly didactic here. There are many ways to write a great paper.) Or it may just provide a roadmap to the rest of the paper. In the conclusion, the last paragraph is where you get to speculate: What does it all mean? What should we research next?
-
-# Literature Review
-
-Studies as early as Matthews and Stimson (1975) and Kingdon (1973) find that
-cue-taking has a large influence on the decisions made by policy-makers. Kingdon
-concluded that cue-taking influences around 40% of decisions while Matthews and
-Stimson pinned the number around 75%. More recent observational studies like
-Masket (2008) found the percentage of votes influenced by cue-taking to be 10%.
-Masket found that information was shared primarily through deskmates, while
-Matthews and Stimson found that it was shared between friends. Coppock (2014)
-found that information was shared between ideologically-similar legislators.
-
-This paper abets the conclusion that cue-taking influences policy decisions
-while updating the approach and contributing a new layer of findings. It uses a
-large dataset from two legislative field experiments, lending it power that
-previous studies may have lacked, and focuses on legislators who share office
-suites as a measure of their influence on one another. The paper contributes the
-findings that that cues complement rather than substitute other sources of
-expertise as well as that cue-making's influence occurs late in the
-decision-making process.
 
 ^[[All analysis for this paper is availible at https://github.com/mirobergam/Replication-paper](https://github.com/mirobergam/Replication-paper)]
 
