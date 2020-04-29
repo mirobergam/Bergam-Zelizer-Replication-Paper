@@ -1,0 +1,5 @@
+replication_data_alternative_spillover_simulations.RData (application/x-rlang-transport) 1613300 bytes.
+zelizer_replication_code_IPC.R (type/x-r-syntax) 32454 bytes.
+zelizer_replication_code_timing_IPC.R (type/x-r-syntax) 6557 bytes.
+zelizer_replication_data_dates_IPC.RData (application/x-rlang-transport) 2401998 bytes.
+zelizer_replication_data_IPC.RData (application/x-rlang-transport) 23158571 bytes.
