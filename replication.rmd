@@ -142,7 +142,7 @@ Randomization Inference.
 
 # Extension
 
-See the figure "Posterior Predictive Distributions For All Models" in Appendix.
+See the figure "Posterior Predictive Distributions" in Appendix.
 In each of the plots, the darker line shows the distribution of the
 observed data regarding their treatments, cosponsorships, and other variables.
 The more faded lines show the how the model I passed in for each respective plot
@@ -220,7 +220,7 @@ gt(table3) %>%
 
 ## Table 4
 
-```{r}
+```{r Table 4}
 
 ## pp_check(model, "dens_overlay") # takes the original data and show in a really dark apttern, and show the bayesian runs of it in the background to see how well the data ftis
 # weird fit
@@ -291,9 +291,35 @@ gt(y_final) %>%
 
 ## Table 6
 
-```{r}
+```{r Table 6}
 
-set.seed(1006)
+### This function creates simulation-based inverse probability weights.
+ipw.function <- function(DATASET , T , T.SPILL , RI.T , RI.T.SPILL , VARNAME){
+	temp <- apply(matrix(1:ncol(RI.T.SPILL) , nrow=1) , 2 , function(z) {
+		temp1 <- as.numeric(RI.T.SPILL[,z]==DATASET[,T.SPILL])
+		temp2 <- as.numeric(RI.T[,z]==DATASET[,T])
+		return(as.numeric(temp1+temp2==2))
+	})
+
+	DATASET$V1 <- 1/apply(temp , 1 , mean)
+	setnames(DATASET,"V1",VARNAME)
+	return(DATASET)
+}
+
+load("Original-Data-and-Code/replication_data_alternative_spillover_simulations.RData")
+
+### Add IPWs for observed assignments
+df <- ipw.function(df , "t" , "t.spill.desk" , t.for.ri , ri.t.spill.desk , "ipw.desk")
+df <- ipw.function(df , "t" , "t.spill.dist" , t.for.ri , ri.t.spill.dist , "ipw.dist")
+df <- ipw.function(df , "t" , "t.spill.ideo" , t.for.ri , ri.t.spill.ideo , "ipw.ideo")
+
+df$treatment.desk <- relevel(interaction(df$t,df$t.spill.desk) , ref = 4)
+df$treatment.dist <- relevel(interaction(df$t,df$t.spill.dist) , ref = 4)
+df$treatment.ideo <- relevel(interaction(df$t,df$t.spill.ideo) , ref = 4)
+
+estimates <- data.frame(itt = matrix(NA,nrow=3,ncol=4))
+row.names(estimates) <- c("t","t.spill","t+t.spill")
+colnames(estimates) <- c("office","desk","distance","ideology")
 
 z1 <- stan_lm(cosp ~ treatment + bill + leg, 
    data = subset(df , office.size > 1 & 
