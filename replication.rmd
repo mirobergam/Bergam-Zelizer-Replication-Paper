@@ -64,6 +64,17 @@ analyze overall a Bayesian approach to this study. This extension served as both
 a robustness test of Zelizer's results and a simplification that makes the
 coefficient estimates more easily reproducable.
 
+
+## Introduction
+
+The first paragraph is a review of the paper you are replicating. Flesh out the details. Tell us about the data and the model. Place it within the relevant literature, via a key citation or two. Highlight implications and caveats. Again, it is hard to summarize a 25 page paper in a paragraph. Do your best. Note that the paper’s own abstract is often a useful guide.
+
+The second paragraph provides more details on your replications. Mention that you used R, and provide an citation to R in your bibliography. (See citation().) Cite the location from which you got the data and code for your replication. (This might be to the Dataverse, a webpage or “personal communication” with the author.) Provide a footnote with a link to your repo.
+
+The third and fourth paragraphs are more flexible. Indeed, they might be only one paragraph or they might be several. What did you do? What did you find?
+
+The final paragraph is different between the introduction and the conclusion. In the introduction, it may not even exist! (We don’t want to be overly didactic here. There are many ways to write a great paper.) Or it may just provide a roadmap to the rest of the paper. In the conclusion, the last paragraph is where you get to speculate: What does it all mean? What should we research next?
+
 ## Literature Review
 
 Studies as early as Matthews and Stimson (1975) and Kingdon (1973) find that
@@ -82,6 +93,36 @@ previous studies may have lacked, and focuses on legislators who share office
 suites. The paper contributes the findings that that cues complement complement
 rather than substitute other sources of expertise as well as that cue-making's
 influence occurs late in the decision-making process.
+
+## Replication
+
+I was able to match all of the coefficient estimates from the original paper in
+my replicated figures. Zelizer gathers his Bayesian estimates using for-loops
+with thousands of iterations. His original code took a large amount of time to
+replicate on my own computer, so I used tools like stan_lm() from the rstanarm()
+package to maintain the Bayesian integrity of the study while greatly minimizing
+the computational power needed.
+
+However, a clear downside to my approach are my inaccurate standard errors. I
+was able to replicate every standard error when using Zelizer's code, but my
+method didn't account for certian intricacies in the data. In one of the two
+studies captured in the data, legislators were not eligable for briefings from
+the staffer/advocate. This leads to implicit clustering in the data of those who
+were not briefed (one of the treatment variables). As a result, the standard
+errors produced by my Bayesian stan_lm models are too small because it assumes
+that all participants in the study receieved a briefing and that therefore is a
+large population of legislators (from that study) who by default have no
+variability in this briefing treatment.
+
+Therefore, while I am able to replicate the standard errors using the original
+replication code, the method used in this paper produces overly narrow standard
+errors that don't take into consideration implicit clustering. Zelizer's more
+accurate method works arounnd this issue using a particular form of
+Randomization Inference.
+
+## Extension
+
+## Conclusion
 
 ^[[All analysis for this paper is availible at https://github.com/mirobergam/Replication-paper](https://github.com/mirobergam/Replication-paper)]
 
