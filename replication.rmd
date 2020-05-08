@@ -1,10 +1,11 @@
 ---
 title: "Zelizer (2019) Paper Replication and Extension"
 author: "Miroslav Bergam"
-date: "4/14/2020"
+date: 5/08/2020"
 output: bookdown::pdf_document2
 bibliography: bibliography.bib
 link_citations: true
+toc: false
 ---
 
 ```{r setup, include=FALSE}
@@ -32,6 +33,8 @@ library(rstanarm)
 library(gtable)
 library(grid)
 
+#### stan_glm(family = binomial)
+
 ```
 
 ```{r Import Data}
@@ -52,13 +55,13 @@ df$treatment <- interaction(df$t,df$t.spill)
 
 Zelizer (2019) finds that the cues that legislators take from their peers, in
 addition to other credible sources of information like briefings, influence
-their policymaking decisions. I succesfully replicated Zelizer’s results. This
-extension not only Zelizer took a Bayesian approach to his findings, running a
-large number of simulations for each table using for-loops to produce estimates
-and standard deviations; however, this made his code very slow and hard to run.
-I used the rstanarm package to both simplify his code and to match his results
-as a robustness check. Finally, I graphed the posterior predictive distributions
-to analyze overall the Bayesian approach to this study. This paper serves as a
+their policymaking decisions. I succesfully replicated Zelizer’s results.
+Zelizer took a Bayesian approach to his findings, running a large number of
+simulations for each table using for-loops to produce estimates and standard
+deviations; however, this made his code very slow and hard to run. I used the
+rstanarm package to both simplify his code and to match his results as a
+robustness check. Finally, I graphed the posterior predictive distributions to
+analyze, overall, the Bayesian approach to this study. This paper serves as a
 robustness test of Zelizer's results, a simplification that makes the
 coefficient estimates more easily reproducable, and an analysis of the study's
 Bayesian model.
@@ -69,7 +72,7 @@ Zelizer (2019) contributes to a body of literature identifying cue-taking from
 other legislators as an influential source of information in legislator's own
 policy-making experience. Early studies such as Matthews and Stimson (1975)
 @side_paper_1 and Kingdon (1973) @side_paper_2 find that cue-taking has a large
-influence on the decisions made by policy-makers. Zelizer uses 'inferference' --
+influence on the decisions made by policy-makers. Zelizer uses 'interference' --
 the experimental nuisance of units interacting and affecting one another -- as
 an opportunity to measure cue-taking. His first treatment variable, then, is
 whether or not the legislator shares an office suite, as self-selecting to be in
@@ -80,11 +83,11 @@ the literature by finding that cues complement rather than substitute other
 sources of expertise, such as briefings.
 
 I successfully replicated his results. We both used R, although I more heavily
-utilized the tidyverse, gt, and rstanarm packages @r-language. I retrieved his code and data
-from its posting on the Harvard Dataverse @dataverse. Although I could successfully
-replicate every result using his data, the models I used in this paper fail to
-recreate his standard error values due to a fundamental difference in our
-models.
+utilized the tidyverse, gt, and rstanarm packages @r-language. I retrieved his
+code and data from its posting on the Harvard Dataverse @dataverse. Although I
+could successfully replicate every result using his data, the models I used in
+this paper fail to recreate his standard error values due to a fundamental
+difference in our models (See: Replication).
 
 I simplified his code using functions from the rstanarm() package to greatly
 lower the amount of time and computing power needed to run his analyses. The
@@ -110,7 +113,7 @@ while updating the approach and contributing a new layer of findings. It uses a
 large dataset from two legislative field experiments, lending it power that
 previous studies may have lacked, and focuses on legislators who share office
 suites as a measure of their influence on one another. The paper contributes the
-findings that that cues complement rather than substitute other sources of
+finding that cues complement rather than substitute other sources of
 expertise as well as that cue-making's influence occurs late in the
 decision-making process.
 
@@ -137,7 +140,7 @@ variability in this briefing treatment.
 Therefore, while I am able to replicate the standard errors using the original
 replication code, the method used in this paper produces overly narrow standard
 errors that don't take into consideration implicit clustering. Zelizer's more
-accurate method works arounnd this issue using a particular form of
+accurate method works around this issue with the data using a particular form of
 Randomization Inference.
 
 # Extension
@@ -146,7 +149,7 @@ See the figure "Posterior Predictive Distributions" in Appendix.
 In each of the plots, the darker line shows the distribution of the
 observed data regarding their treatments, cosponsorships, and other variables.
 The more faded lines show the how the model I passed in for each respective plot
-fits their associated data. The resulting finding apply across all of the models
+fits the associated data. The resulting finding apply across all of the models
 used in the study: a Bayesian approach is an effective but imperfect way of
 fitting this data to a model. The grey lines shows the Bayesian model use this
 discrete data in non-discrete ways, as seen by the continuous distributions.
@@ -154,7 +157,7 @@ Additionally, it extrapolates the data, producing results that are below zero
 despite the data not dipping below 0. However, the peaks of the two lines both
 consistently center around the same value (around 0), showing that it is
 somewhat accruate. As a result, I've determined that the Bayesian model both
-Zelizer and I use to produce our coefficient results is a flawed but accruate
+Zelizer and I use to produce our coefficient results is a flawed but accurate
 way of fitting the data.
 
 # Conclusion
@@ -179,7 +182,6 @@ of iterations to perform Randomization Inference. However, these iterations make
 the code slow and cumbersome for those looking to replicate the experiment. A
 future extension would involve performing Randomization Inference using the
 quicker, more efficient methods used by the rstanarm package.
-
 
 ^[[All analysis for this paper is availible at https://github.com/mirobergam/Replication-paper](https://github.com/mirobergam/Replication-paper)]
 
@@ -340,7 +342,7 @@ z3 <- stan_lm(cosp ~ treatment.dist + bill + leg,
                    !is.na(t.spill.desk) &
                    !is.na(t.spill.dist) &
                    !is.na(t.spill.ideo)),
-   weights=ipw.desk, refresh = FALSE, prior = NULL)
+   weights=ipw.dist, refresh = FALSE, prior = NULL)
 
 z4 <- stan_lm(cosp ~ treatment.ideo + bill + leg,
          data = subset(df , office.size > 1 &
