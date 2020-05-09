@@ -70,24 +70,24 @@ Bayesian model.
 
 Zelizer (2019) contributes to a body of literature identifying cue-taking from
 other legislators as an influential source of information in legislator's own
-policy-making experience. Early studies such as Matthews and Stimson (1975)
-@side_paper_1 and Kingdon (1973) @side_paper_2 find that cue-taking has a large
-influence on the decisions made by policy-makers. Zelizer uses 'interference' --
-the experimental nuisance of units interacting and affecting one another -- as
-an opportunity to measure cue-taking. His first treatment variable, then, is
-whether or not the legislator shares an office suite, as self-selecting to be in
-an office suite and sharing a space with another legislator will inevitably lead
-to the exchange of ideas. The second treatment variable is whether or not the
-legislators were briefed on a particular bill. With this, the paper contributes
-the literature by finding that cues complement rather than substitute other
-sources of expertise, such as briefings.
+policy-making experience. Early studies such as Matthews and Stimson (1975) and
+Kingdon (1973) find that cue-taking has a large influence on the decisions made
+by policy-makers. Zelizer uses 'interference' -- the experimental nuisance of
+units interacting and affecting one another -- as an opportunity to measure
+cue-taking. His first treatment variable, then, is whether or not the legislator
+shares an office suite, as self-selecting to be in an office suite and sharing a
+space with another legislator will inevitably lead to the exchange of ideas. The
+second treatment variable is whether or not the legislators were briefed on a
+particular bill. With this, the paper contributes the literature by finding that
+cues complement rather than substitute other sources of expertise, such as
+briefings.
 
 I successfully replicated his results. We both used R, although I more heavily
-utilized the tidyverse, gt, and rstanarm packages @r-language. I retrieved his
-code and data from its posting on the Harvard Dataverse @dataverse. Although I
-could successfully replicate every result using his data, the models I used in
-this paper fail to recreate his standard error values due to a fundamental
-difference in our models (See: Replication).
+utilized the tidyverse, gt, and rstanarm packages. I retrieved his code and data
+from its posting on the Harvard Dataverse. Although I could successfully
+replicate every result using his data, the models I used in this paper fail to
+recreate his standard error values due to a fundamental difference in our models
+(See: Replication).
 
 I simplified his code using functions from the rstanarm() package to greatly
 lower the amount of time and computing power needed to run his analyses. The
@@ -183,7 +183,7 @@ the code slow and cumbersome for those looking to replicate the experiment. A
 future extension would involve performing Randomization Inference using the
 quicker, more efficient methods used by the rstanarm package.
 
-^[[All analysis for this paper is availible at https://github.com/mirobergam/Replication-paper](https://github.com/mirobergam/Replication-paper)]
+^[[All analysis for this paper is availible at https://github.com/mirobergam/Bergam-Zelizer-Replication-Paper](https://github.com/mirobergam/Bergam-Zelizer-Replication-Paper)]
 
 # Figures 
 
@@ -526,4 +526,4 @@ grid.arrange(ppd4, ppd51, ppd52, ppd61,
 
 ## Bibliography
 
-@main_paper @side_paper_1 @side_paper_2 @dataverse @r-language
+@main_paper @side_paper_1 @side_paper_2 @dataverse @r_language
